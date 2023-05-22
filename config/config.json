@@ -1,0 +1,7 @@
+{
+    "AppVersion": "1.0.0",
+    "Port": "4200",
+    "Mode": "Development",
+    "JwtSecretKey": "secretkey",
+    "DB_URL":"root:Digi@2023@/infraguard_manager?parseTime=true"
+}
