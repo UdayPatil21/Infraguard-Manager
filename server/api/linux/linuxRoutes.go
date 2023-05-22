@@ -24,11 +24,13 @@ func sendCommand(c *gin.Context) {
 	if err != nil {
 		logger.Error("Error binding data", err)
 		c.JSON(http.StatusExpectationFailed, err)
+		return
 	}
 	out, err := sendCommandService(input)
 	if err != nil {
 		logger.Error("Error executing command on instance", err)
 		c.JSON(http.StatusExpectationFailed, err)
+		return
 	}
 	logger.Info("OUT:sendCommand")
 	c.JSON(http.StatusOK, out)
@@ -43,11 +45,13 @@ func executeScript(c *gin.Context) {
 	if err != nil {
 		logger.Error("Error getting form data", err)
 		c.JSON(http.StatusBadRequest, err)
+		return
 	}
 	content, _ := file.Open()
 	buf := bytes.NewBuffer(nil)
 	if _, err = io.Copy(buf, content); err != nil {
 		c.JSON(http.StatusExpectationFailed, err)
+		return
 	}
 	var input model.Executable
 	input.Permission = per
@@ -57,6 +61,7 @@ func executeScript(c *gin.Context) {
 	if err != nil {
 		logger.Error("Error executing script file", err)
 		c.JSON(http.StatusBadRequest, err)
+		return
 	}
 	logger.Info("OUT:executeScript")
 	c.JSON(http.StatusOK, res)
@@ -69,11 +74,13 @@ func sudoCommand(c *gin.Context) {
 	if err != nil {
 		logger.Error("Error binding data", err)
 		c.JSON(http.StatusExpectationFailed, err)
+		return
 	}
 	out, err := sudoCommandService(input)
 	if err != nil {
 		logger.Error("Error executing command on instance", err)
 		c.JSON(http.StatusExpectationFailed, err)
+		return
 	}
 	logger.Info("OUT:sudoCommand")
 	c.JSON(http.StatusOK, out)

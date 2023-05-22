@@ -6,18 +6,19 @@ import (
 	model "infraguard-manager/models"
 )
 
-func getPublicAddressDB(agent_id string) (model.InstanceInfo, error) {
+func getPublicAddressDB(machine_id string) (model.InstanceInfo, error) {
 	logger.Info("IN:getPublicAddress")
 
 	res := model.InstanceInfo{}
-	query := "Select * from agent where agent_id=?"
+	query := "Select * from agent where machine_id=?"
 	sql := db.MySqlConnection()
-	result, err := sql.Query(query, agent_id)
+	err := sql.QueryRow(query, machine_id).Scan(&res.Agent_id, &res.Name, &res.UserName, &res.MachineID, &res.PublicIP, &res.HostName, &res.OS, &res.CreatedAt)
 	if err != nil {
 		logger.Error("Error feching instance info", err)
 		return model.InstanceInfo{}, err
 	}
-	result.Scan(&res)
+	defer sql.Close()
+	// result.Scan(&res)
 	logger.Info("IN:getPublicAddress")
 	return res, nil
 }

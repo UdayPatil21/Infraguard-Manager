@@ -16,12 +16,13 @@ import (
 func sendCommandService(input model.RunCommand) (any, error) {
 	logger.Info("IN:sendCommandService")
 	//Get public ip from db
-	instanceInfo, err := getPublicAddressDB(input.AgentID)
+	instanceInfo, err := getPublicAddressDB(input.MachineID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
 		return nil, err
 	}
-	_ = instanceInfo
+
+	instanceInfo.MachineID = strings.TrimSpace(instanceInfo.MachineID)
 
 	jsonReq, _ := json.Marshal(input)
 	tr := &http.Transport{
@@ -76,7 +77,7 @@ func executeScriptService(input model.Executable) (any, error) {
 func sudoCommandService(input model.RunCommand) (any, error) {
 	logger.Info("IN:sudoCommandService")
 	//Get public ip from db
-	instanceInfo, err := getPublicAddressDB(input.AgentID)
+	instanceInfo, err := getPublicAddressDB(input.MachineID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
 		return nil, err

@@ -1,9 +1,14 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type InstanceInfo struct {
-	Name      any       `json:"name" db:"name"`
+	Agent_id  uuid.UUID `json:"agent_id" db:"agent_id"`
+	Name      string    `json:"name" db:"name"`
 	UserName  string    `json:"user_name" db:"user_name"`
 	MachineID string    `json:"machine_id" db:"mahine_id"`
 	PublicIP  string    `json:"public_ip" db:"public_ip"`
@@ -13,8 +18,8 @@ type InstanceInfo struct {
 }
 
 type RunCommand struct {
-	AgentID string `json:"agent_id" db:"agent_id" validate:"required"`
-	Command string `json:"command" validate:"required"`
+	MachineID string `json:"machine_id" db:"machine_id" validate:"required"`
+	Command   string `json:"command" validate:"required"`
 }
 
 type Executable struct {
