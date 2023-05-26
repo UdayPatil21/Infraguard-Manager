@@ -17,11 +17,15 @@ func StartServer() {
 	// 	c.JSON(http.StatusOK, "Pong")
 	// })
 
+	//Init Config
+	configHelper.InitConfig()
+
 	//Init logger
 	logger.Init()
 
-	//Init Config
-	configHelper.InitConfig()
+	// Check all agent status
+	// sheduler.CheckAgentStatus()
+
 	//Initialize routes
 	routes.InitRoutes(r)
 	// log.Println("Server started on :", port)
@@ -31,4 +35,5 @@ func StartServer() {
 func main() {
 
 	StartServer()
+
 }

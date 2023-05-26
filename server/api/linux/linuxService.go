@@ -21,16 +21,15 @@ func sendCommandService(input model.RunCommand) (any, error) {
 		logger.Error("Error getting instance info from DB", err)
 		return nil, err
 	}
-
 	instanceInfo.MachineID = strings.TrimSpace(instanceInfo.MachineID)
-
 	jsonReq, _ := json.Marshal(input)
+
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 	}
 	client := &http.Client{Transport: tr}
 	//send and execute command on the instance
-	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":8080/api/linux/send-command"),
+	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":8080/api/linux/send-command"),
 		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		logger.Error("Error executing command", err)
@@ -40,7 +39,7 @@ func sendCommandService(input model.RunCommand) (any, error) {
 
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("Error:", err)
 	}
 	logger.Info("OUT:sendCommandService")
 	return string(responseData), nil

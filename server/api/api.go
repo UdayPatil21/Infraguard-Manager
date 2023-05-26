@@ -40,9 +40,9 @@ func RegisterInstance(c *gin.Context) {
 //Insert instance data into the database
 func ResisterInstanceService(info model.InstanceInfo) error {
 	agent_id := uuid.New()
-	query := "INSERT INTO `agent` (`agent_id`,`name`, `user_name`, `machine_id`,`public_ip`,`hostname`,`os`,`created_at`) VALUES (?,?,?,?,?,?,?,?)"
+	query := "INSERT INTO `agent` (`agent_id`,`name`, `user_name`, `machine_id`,`public_ip`,`hostname`,`os`,`created_at`,`status`) VALUES (?,?,?,?,?,?,?,?,?)"
 	sql := db.MySqlConnection()
-	_, err := sql.Query(query, agent_id, info.Name, info.UserName, info.MachineID, info.PublicIP, info.HostName, info.OS, info.CreatedAt)
+	_, err := sql.Query(query, agent_id, info.Name, info.UserName, info.MachineID, info.PublicIP, info.HostName, info.OS, info.CreatedAt, info.Status)
 	if err != nil {
 		logger.Error("impossible insert agent: %s", err)
 		return err
@@ -62,7 +62,7 @@ func CheckAgentDB(instance model.InstanceInfo) bool {
 	res := model.InstanceInfo{}
 	query := "select * from agent where  machine_id=? and public_ip=?"
 	sql := db.MySqlConnection()
-	err := sql.QueryRow(query, instance.MachineID, instance.PublicIP).Scan(&res.Agent_id, &res.Name, &res.UserName, &res.MachineID, &res.PublicIP, &res.HostName, &res.OS, &res.CreatedAt)
+	err := sql.QueryRow(query, instance.MachineID, instance.PublicIP).Scan(&res.Agent_id, &res.Name, &res.UserName, &res.MachineID, &res.PublicIP, &res.HostName, &res.OS, &res.CreatedAt, &res.Status)
 	if err != nil {
 		logger.Error("Error retriving agent", err)
 		return false
