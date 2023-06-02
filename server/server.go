@@ -23,7 +23,7 @@ func StartServer() {
 	//Init logger
 	logger.Init()
 
-	// Check all agent status
+	// Check all agent status concurrently
 	// sheduler.CheckAgentStatus()
 
 	//Initialize routes
