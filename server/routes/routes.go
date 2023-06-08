@@ -18,7 +18,7 @@ func InitRoutes(route *gin.Engine) {
 	routeGroup.GET("/getAgentActivation:id", activation.GetAgentActivationById)
 	routeGroup.GET("/getAllActivations", activation.GetAllActivation)
 	routeGroup.POST("/editAgentActivation", activation.UpdateAgentActivation)
-	routeGroup.POST("/deleteAgentActivation:id", activation.DeleteAgentActivationById)
+	routeGroup.GET("/deleteAgentActivation:id", activation.DeleteAgentActivationById)
 	windows.InitWindowsRoutes(routeGroup)
 	linux.InitLinuxRoutes(routeGroup)
 }

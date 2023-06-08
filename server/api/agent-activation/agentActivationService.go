@@ -5,7 +5,7 @@ import (
 	model "infraguard-manager/models"
 )
 
-func addAgentActivationService(data model.Activation) error {
+func addAgentActivationService(data model.AgentActivations) error {
 	logger.Info("IN: addAgentActivationService")
 	//Insert activation data into the table
 	err := addAgentActivationDB(data)

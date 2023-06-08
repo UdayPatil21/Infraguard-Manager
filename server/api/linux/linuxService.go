@@ -21,7 +21,7 @@ func sendCommandService(input model.RunCommand) (any, error) {
 		logger.Error("Error getting instance info from DB", err)
 		return nil, err
 	}
-	instanceInfo.MachineID = strings.TrimSpace(instanceInfo.MachineID)
+	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
 	jsonReq, _ := json.Marshal(input)
 
 	tr := &http.Transport{
@@ -29,7 +29,7 @@ func sendCommandService(input model.RunCommand) (any, error) {
 	}
 	client := &http.Client{Transport: tr}
 	//send and execute command on the instance
-	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":8080/api/linux/send-command"),
+	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost" */ + ":4200/api/linux/send-command"),
 		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		logger.Error("Error executing command", err)

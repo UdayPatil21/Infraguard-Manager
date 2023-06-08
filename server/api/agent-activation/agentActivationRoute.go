@@ -6,13 +6,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 //Insert activation data into the database
 func AddAgentActivation(c *gin.Context) {
 	logger.Info("IN:AddAgentActivation")
-	activationData := model.Activation{}
+	activationData := model.AgentActivations{}
 	err := c.Bind(&activationData)
 	if err != nil {
 		logger.Error("Error in binding the activation data", err)
@@ -48,8 +47,8 @@ func GetAgentActivationById(c *gin.Context) {
 	activationId := c.Param("id")
 	//get uuid from activationId string
 	//convert string to uuid
-	id, _ := uuid.Parse(activationId)
-	activation, err := GetActivationByIdDB(id)
+	// id, _ := uuid.Parse(activationId)
+	activation, err := GetActivationByIdDB(activationId)
 	if err != nil {
 		logger.Error("Error getting agent data", err)
 		c.JSON(http.StatusExpectationFailed, err)
@@ -62,7 +61,7 @@ func GetAgentActivationById(c *gin.Context) {
 //Edit activation data and update into the database
 func UpdateAgentActivation(c *gin.Context) {
 	logger.Info("IN: UpdateAgentActivation")
-	updateData := model.Activation{}
+	updateData := model.AgentActivations{}
 	err := c.Bind(&updateData)
 	if err != nil {
 		logger.Error("Error binding data", err)
