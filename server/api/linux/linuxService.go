@@ -45,6 +45,39 @@ func sendCommandService(input model.RunCommand) (any, error) {
 	return string(responseData), nil
 }
 
+//Execute sudo commands
+func sudoCommandService(input model.RunCommand) (any, error) {
+	logger.Info("IN:sudoCommandService")
+	//Get public ip from db
+	instanceInfo, err := getPublicAddressDB(input.MachineID)
+	if err != nil {
+		logger.Error("Error getting instance info from DB", err)
+		return nil, err
+	}
+	_ = instanceInfo
+
+	jsonReq, _ := json.Marshal(input)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+	}
+	client := &http.Client{Transport: tr}
+	//send and execute command on the instance
+	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*localhost" */ + ":4200/api/linux/sudo-command"),
+		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		logger.Error("Error executing command", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger.Info("OUT:sudoCommandService")
+	return string(responseData), nil
+}
+
 //Execute scripts
 func executeScriptService(input model.Executable) (any, error) {
 	logger.Info("IN:executeScriptService")
@@ -69,38 +102,5 @@ func executeScriptService(input model.Executable) (any, error) {
 		return nil, err
 	}
 	logger.Info("OUT:executeScriptService")
-	return string(responseData), nil
-}
-
-//Execute sudo commands
-func sudoCommandService(input model.RunCommand) (any, error) {
-	logger.Info("IN:sudoCommandService")
-	//Get public ip from db
-	instanceInfo, err := getPublicAddressDB(input.MachineID)
-	if err != nil {
-		logger.Error("Error getting instance info from DB", err)
-		return nil, err
-	}
-	_ = instanceInfo
-
-	jsonReq, _ := json.Marshal(input)
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-	}
-	client := &http.Client{Transport: tr}
-	//send and execute command on the instance
-	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":8080/api/linux/sudo-command"),
-		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
-	if err != nil {
-		logger.Error("Error executing command", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	responseData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	logger.Info("OUT:sudoCommandService")
 	return string(responseData), nil
 }

@@ -34,7 +34,10 @@ func addAgentActivationDB(data model.AgentActivations) error {
 	// 	logger.Error("Error inserting data to db", err)
 	// 	return err
 	// }
-	gorm.Table("AgentActivations").Create(&data)
+	if err := gorm.Table(db.ActivationDB).Create(&data).Error; err != nil {
+		logger.Error("Error inserting data", err)
+		return err
+	}
 	logger.Info("OUT:getAgentActivationDB")
 	return nil
 }
@@ -45,17 +48,10 @@ func getAllActivationDB() ([]model.AgentActivations, error) {
 	activations := []model.AgentActivations{}
 	// qry := "select * from AgentActivations"
 	gorm := db.MySqlConnection()
-	// row, err := sql.Query(qry)
-	// if err != nil {
-	// 	logger.Error("Error fetching activations")
-	// 	return activations, err
-	// }
-	// for row.Next() {
-	// 	data := model.AgentActivations{}
-	// 	row.Scan(&data.ID, &data.SerialID, &data.ActivationID, &data.ActivationCode, &data.ActivationName, &data.TotalServers, &data.CreatedBy, &data.CreatedDateTime, &data.ModifiedBy, &data.LastModifiedDateTime, &data.IsActive)
-	// 	activations = append(activations, data)
-	// }
-	gorm.Table("AgentActivations").Find(&activations)
+	if err := gorm.Table(db.ActivationDB).Find(&activations).Error; err != nil {
+		logger.Error("Error getting all the activation details", err)
+		return activations, err
+	}
 	logger.Info("OUT:getAllActivationDB")
 	return activations, nil
 }
@@ -87,41 +83,30 @@ func (as *activation) GetActivationByIdDB(activationId uuid.UUID) (model.AgentAc
 }
 
 func GetActivationByIdDB(activationId string) (model.AgentActivations, error) {
-	logger.Info("IN:getActivationById")
+	logger.Info("IN:GetActivationByIdDB")
 	activation := model.AgentActivations{}
-	//get uuid from activationId string
-	//convert string to uuid
-	// id, _ := uuid.Parse(activationId)
 	// query := "select * from `AgentActivations` where `ActivationID`=?"
 	gorm := db.MySqlConnection()
-
-	// err := sql.QueryRow(query, activationId).Scan(&activation.ID, &activation.SerialID, &activation.ActivationID, &activation.ActivationCode, &activation.ActivationName, &activation.TotalServers, &activation.CreatedBy, &activation.CreatedDateTime, &activation.ModifiedBy, &activation.LastModifiedDateTime, &activation.IsActive)
-	// if err != nil {
-	// 	logger.Error("Error in getting agent data", err)
-	// 	return activation, err
-	// }
-	gorm.Table("AgentActivations").Where("ActivationID=?", activationId).Find(&activation)
-	logger.Info("OUT:getActivationById")
+	if err := gorm.Table(db.ActivationDB).Where("ActivationID=?", activationId).Find(&activation).Error; err != nil {
+		logger.Error("Error getting activation", err)
+		return activation, err
+	}
+	logger.Info("OUT:GetActivationByIdDB")
 	return activation, nil
 }
 
 // Get agent activation details by activation name
 func GetActivationByNumberDB(activationNumber int) (model.AgentActivations, error) {
-	logger.Info("IN:getActivationById")
+	logger.Info("IN:GetActivationByNumberDB")
 	activation := model.AgentActivations{}
-	//get uuid from activationId string
-	//convert string to uuid
-	// id, _ := uuid.Parse(activationName)
 	gorm := db.MySqlConnection()
-	// query := "select * from AgentActivations where ID=?"
-	// err := sql.QueryRow(query, activationNumber).Scan(&activation.ID, &activation.SerialID, &activation.ActivationID, &activation.ActivationCode, &activation.ActivationName, &activation.TotalServers, &activation.CreatedBy, &activation.CreatedDateTime, &activation.ModifiedBy, &activation.LastModifiedDateTime, &activation.IsActive)
-	gorm.Table("AgentActivations").Where("ID=?", activationNumber).Find(&activation)
-	// if err != nil {
-	// 	logger.Error("Error in getting agent data")
-	// 	return activation, err
-	// }
+	//Select * from AgentActivations where ID=?
+	if err := gorm.Table(db.ActivationDB).Where("ID=?", activationNumber).Find(&activation).Error; err != nil {
+		logger.Error("Error in getting agent data")
+		return activation, err
+	}
 
-	logger.Info("OUT:getActivationById")
+	logger.Info("OUT:GetActivationByNumberDB")
 	return activation, nil
 }
 
@@ -131,18 +116,11 @@ func updateAgentActivationDB(updateData model.AgentActivations) error {
 	gorm := db.MySqlConnection()
 	new := model.AgentActivations{}
 	// updateQuery := "update `AgentActivations` set `ActivationName`=?,`TotalServers`=? where `ActivationID`=?"
-	// res, err := sql.Exec(updateQuery, updateData.ActivationName, updateData.TotalServers)
-	// if err != nil {
-	// 	logger.Error("Error updating data", err)
-	// 	return err
-	// }
-	// count, err := res.RowsAffected()
-	// if count == 0 {
-	// 	logger.Error("Error executing query", err)
-	// 	return err
-	// }
 	//First fetch data you want to update
-	gorm.Table("AgentActivations").Where("ActivationID=?", updateData.ActivationID).Find(&new)
+	if err := gorm.Table(db.ActivationDB).Where("ActivationID=?", updateData.ActivationID).Find(&new).Error; err != nil {
+		logger.Error("Error getting data for updation", err)
+		return err
+	}
 	//change the required field
 	if updateData.SerialID != "" {
 		new.SerialID = updateData.SerialID
@@ -165,7 +143,10 @@ func updateAgentActivationDB(updateData model.AgentActivations) error {
 	new.LastModifiedDateTime = time.Now()
 
 	//Save updated data
-	gorm.Table("AgentActivations").Where("ActivationID=?", updateData.ActivationID).Update(&new)
+	if result := gorm.Table(db.ActivationDB).Where("ActivationID=?", updateData.ActivationID).Update(&new); result.Error != nil {
+		logger.Error("Error updating the activation details", result.Error)
+		return result.Error
+	}
 	logger.Info("OUT:updateAgentActivationDB")
 	return nil
 }
@@ -173,23 +154,13 @@ func updateAgentActivationDB(updateData model.AgentActivations) error {
 //Delete agent activation data of specific id  from database
 func DeleteAgentActivationByIdDB(activationId string) error {
 	logger.Info("IN:DeleteAgentActivationByIdDB")
-	//convert activationId into uuid
-	// id, _ := uuid.Parse(activationId)
 	activation := model.AgentActivations{}
 	gorm := db.MySqlConnection()
-	//Prepare update query
 	// deleteQuery := "delete from `activation` where `activation_id`=?"
-	// res, err := sql.Exec(deleteQuery, id)
-	// if err != nil {
-	// 	logger.Error("Error in getting agent data", err)
-	// 	return err
-	// }
-	// count, err := res.RowsAffected()
-	// if count == 0 {
-	// 	logger.Error("Error in deleting the record", err)
-	// 	return err
-	// }
-	gorm.Table("AgentActivations").Where("ActivationID = ?", activationId).Delete(&activation)
+	if err := gorm.Table("AgentActivations").Where("ActivationID = ?", activationId).Delete(&activation).Error; err != nil {
+		logger.Error("Error in deletion of activation", err)
+		return err
+	}
 	logger.Info("OUT:DeleteAgentActivationByIdDB")
 	return nil
 }

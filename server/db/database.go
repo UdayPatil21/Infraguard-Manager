@@ -8,8 +8,13 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// func MySqlConnection() *sql.DB {
+const (
+	ActivationDB = "AgentActivations"
+	ServerDB     = "Servers"
+)
 
+//My SQL driver
+// func MySqlConnection() *sql.DB {
 // 	dburl := configHelper.GetString("DBURL")
 // 	//read config based db url and connect
 // 	log.Print("Create MySql Connection")

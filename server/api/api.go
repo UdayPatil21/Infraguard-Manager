@@ -45,9 +45,8 @@ func RegisterInstance(c *gin.Context) {
 
 //Insert instance data into the database
 func ResisterInstanceService(info model.Servers) error {
-	// agent_id := uuid.New()
-	//query := "INSERT INTO `Servers` (`agent_id`,`name`, `user_name`, `machine_id`,`public_ip`,`hostname`,`os`,`created_at`,`status`,`activation_number`) VALUES (?,?,?,?,?,?,?,?,?,?)"
 
+	//query := "INSERT INTO `Servers` (`agent_id`,`name`, `user_name`, `machine_id`,`public_ip`,`hostname`,`os`,`created_at`,`status`,`activation_number`) VALUES (?,?,?,?,?,?,?,?,?,?)"
 	// `INSERT INTO `Servers` (`SerialID`,`Name`, `InstanceID`, `ServerID`,`ServerTags`,`PublicIP`,`PublicDNS`,`RegionID`,`OtherRegionName`,`Platform`,`OsVersion`,`ClusterID`,`InstanceProfileARN`,`Tags`,'AdditionalData',`ComputerName`,`ProviderID`,`ProjectID`,`CompanyID`,`MissingPatches`,`InstalledPatches`,`TotalPatches`,`AmiID`,`AmiCreationDetail`,
 	// ``) VALUES (?,?,?,?,?,?,?,?,?,?)`
 	// query := `INSERT INTO Servers (SerialID,Name,InstanceID,ServerTags,PublicIP,PublicDNS,RegionID,OtherRegionName,Platform,OsVersion,ClusterID,InstanceProfileARN,Tags,AdditionalData,ComputerName,ProviderID,ProjectID,CompanyID,
@@ -58,18 +57,12 @@ func ResisterInstanceService(info model.Servers) error {
 	// _, err := sql.Query(query, info.SerialID, info.Name, info.InstanceID, info.ServerTags, info.PublicIP, info.PublicDNS, info.RegionID, info.OtherRegionName, info.Platform, info.OsVersion, info.ClusterID, info.InstanceProfileARN, info.Tags, info.AdditionalData, info.ComputerName, info.ProviderID, info.ProjectID, info.CompanyID,
 	// 	info.InstalledPatches, info.TotalPatches, info.AmiID, info.AmiCreationDetail, info.PatchCommandID, info.InstalledPatches, info.PatchInitiatedBy, info.PatchInstalledDate, info.IntervalsEmailDateTime, info.PatchScannedDate, info.SiteHostName, info.ResourceGroup, info.ResourceGroupID, info.SupportedAppsData, info.AgentActivationID, info.CreatedDate)
 	// gorm.AutoMigrate(&info)
-	gorm.Table("Servers").Create(&info)
-	// if err != nil {
-	// 	logger.Error("impossible insert AgentActivations: %s", err)
-	// 	return err
-	// }
-	defer gorm.Close()
-	// id, err := insertResult.()
-	// if err != nil {
-	// 	logger.Error("impossible to retrieve last inserted id: %s", err)
-	// 	return err
-	// }
-	// logger.Info("inserted id:", id)
+
+	//Insert into Servers () Values(&info)
+	if err := gorm.Table(db.ServerDB).Create(&info).Error; err != nil {
+		logger.Error("impossible insert AgentActivations: %s", err)
+		return err
+	}
 	return nil
 }
 
@@ -147,10 +140,11 @@ func CheckAgentDB(instance model.Servers) bool {
 	// 	return false
 	// }
 	gorm := db.MySqlConnection()
-	gorm.AutoMigrate(&server)
-	gorm.Table("Servers").Where("InstanceID=?", instance.InstanceID).Find(&server)
-	// json.Unmarshal(serverData, &res)
-	defer gorm.Close()
+	// gorm.AutoMigrate(&server)
+	if result := gorm.Table(db.ServerDB).Where("InstanceID=?", instance.InstanceID).Find(&server); result.Error != nil {
+		logger.Error("Error getting activation details", result.Error)
+		return false
+	}
 	if server.SerialID != "" {
 		logger.Info("Agent already available")
 		return true
