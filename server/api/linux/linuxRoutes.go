@@ -27,7 +27,7 @@ func sendCommand(c *gin.Context) {
 	out, err := sendCommandService(input)
 	if err != nil {
 		logger.Error("Error executing command on instance", err)
-		c.JSON(http.StatusExpectationFailed, err)
+		c.JSON(http.StatusExpectationFailed, err.Error())
 		return
 	}
 	logger.Info("OUT:sendCommand")

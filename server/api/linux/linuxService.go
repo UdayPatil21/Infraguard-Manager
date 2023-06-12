@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
 	"io/ioutil"
@@ -36,10 +37,13 @@ func sendCommandService(input model.RunCommand) (any, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New("Error Executing Command")
+	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error("Error:", err)
+		return "", err
 	}
 	logger.Info("OUT:sendCommandService")
 	return string(responseData), nil
