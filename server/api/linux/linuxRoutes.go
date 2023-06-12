@@ -3,6 +3,7 @@ package linux
 import (
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -51,8 +52,9 @@ func executeScript(c *gin.Context) {
 	// 	c.JSON(http.StatusExpectationFailed, err)
 	// 	return
 	// }
-	var input model.Executable
-	err := c.Bind(&input)
+	// var input model.Executable
+	data, err := ioutil.ReadAll(c.Request.Body)
+	// err := c.Bind(&input)
 	if err != nil {
 		logger.Error("error binding data", err)
 		c.JSON(http.StatusExpectationFailed, err)
@@ -61,7 +63,7 @@ func executeScript(c *gin.Context) {
 	// input.Permission = per
 	// input.Script = buf.Bytes()
 
-	res, err := executeScriptService(input)
+	res, err := executeScriptService(data)
 	if err != nil {
 		logger.Error("Error executing script file", err)
 		c.JSON(http.StatusBadRequest, err)

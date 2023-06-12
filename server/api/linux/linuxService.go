@@ -83,23 +83,25 @@ func sudoCommandService(input model.RunCommand) (any, error) {
 }
 
 //Execute scripts
-func executeScriptService(input model.Executable) (any, error) {
+func executeScriptService(jsonReq []byte) (any, error) {
 	logger.Info("IN:executeScriptService")
 	// marshal request data
-	jsonReq, _ := json.Marshal(input)
+	// jsonReq, _ := json.Marshal(input)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 	}
 	client := &http.Client{Transport: tr}
 
-	resp, err := client.Post(("http://" + "localhost" + ":8080/api/linux/execute-script"),
+	resp, err := client.Post(("http://" + "localhost" + ":4200/api/linux/execute-script"),
 		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
-
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New("Error Executing Script")
+	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error("Error reading response", err)
