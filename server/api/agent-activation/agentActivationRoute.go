@@ -12,6 +12,7 @@ import (
 func AddAgentActivation(c *gin.Context) {
 	logger.Info("IN:AddAgentActivation")
 	activationData := model.AgentActivations{}
+	res := model.Response{}
 	err := c.Bind(&activationData)
 	if err != nil {
 		logger.Error("Error in binding the activation data", err)
@@ -25,12 +26,15 @@ func AddAgentActivation(c *gin.Context) {
 		return
 	}
 	logger.Info("OUT:AddAgentActivation")
-	c.JSON(http.StatusOK, "success")
+	res.Data = "Activation Added Successfully"
+	res.Status = true
+	c.JSON(http.StatusOK, res)
 }
 
 //Get all activation data from the database
 func GetAllActivation(c *gin.Context) {
 	logger.Info("IN:GetAllActivation")
+	res := model.Response{}
 	activations, err := getAllActivationDB()
 	if err != nil {
 		logger.Error("Error getting info", err)
@@ -38,6 +42,13 @@ func GetAllActivation(c *gin.Context) {
 		return
 	}
 	logger.Info("OUT:GetAllActivation")
+	if len(activations) > 0 {
+		res.Data = activations
+		res.Status = true
+	} else {
+		res.Data = "Activation Details Not Found"
+		res.Status = false
+	}
 	c.JSON(http.StatusOK, activations)
 }
 
@@ -45,6 +56,7 @@ func GetAllActivation(c *gin.Context) {
 func GetAgentActivationById(c *gin.Context) {
 	logger.Info("IN:GetAgentActivationById")
 	activationId := c.Param("id")
+	res := model.Response{}
 	//get uuid from activationId string
 	//convert string to uuid
 	// id, _ := uuid.Parse(activationId)
@@ -55,13 +67,22 @@ func GetAgentActivationById(c *gin.Context) {
 		return
 	}
 	logger.Info("OUT:GetAgentActivationById")
-	c.JSON(http.StatusOK, activation)
+	if activation.ActivationID != "" {
+		res.Data = activation
+		res.Status = true
+	} else {
+		res.Data = "Activation Details Not Found"
+		res.Status = false
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 //Edit activation data and update into the database
 func UpdateAgentActivation(c *gin.Context) {
 	logger.Info("IN: UpdateAgentActivation")
 	updateData := model.AgentActivations{}
+	res := model.Response{}
 	err := c.Bind(&updateData)
 	if err != nil {
 		logger.Error("Error binding data", err)
@@ -75,12 +96,15 @@ func UpdateAgentActivation(c *gin.Context) {
 		return
 	}
 	logger.Info("OUT: UpdateAgentActivation")
-	c.JSON(http.StatusOK, "success")
+	res.Data = "Activation Updated Successfully"
+	res.Status = true
+	c.JSON(http.StatusOK, res)
 }
 
 //Delete activation data from the database
 func DeleteAgentActivationById(c *gin.Context) {
 	logger.Info("IN:DeleteAgentActivation")
+	res := model.Response{}
 	id := c.Param("id")
 	err := DeleteAgentActivationByIdDB(id)
 	if err != nil {
@@ -89,5 +113,7 @@ func DeleteAgentActivationById(c *gin.Context) {
 		return
 	}
 	logger.Info("OUT:DeleteAgentActivation")
-	c.JSON(http.StatusOK, "success")
+	res.Data = "Activation Deleted Successfully"
+	res.Status = true
+	c.JSON(http.StatusOK, res)
 }

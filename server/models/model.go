@@ -41,6 +41,10 @@ type Executable struct {
 // 	IsActive             string
 // }
 
+type Response struct {
+	Data   any
+	Status bool
+}
 type AgentActivations struct {
 	ID                   int       `gorm:"column:ID;AUTO_INCREMENT;NOT NULL"`
 	SerialID             string    `gorm:"column:SerialID"`
