@@ -5,7 +5,6 @@ import (
 	"infraguard-manager/db"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
-	"time"
 
 	"net/http"
 
@@ -196,8 +195,8 @@ func UpdateAgent(c *gin.Context) {
 	}
 	new.PublicIP = server.NetIP
 
-	d, _ := time.Parse("2006-01-02", new.CreatedDate)
-	new.CreatedDate = d.String()
+	// d, _ := time.Parse("2006-01-02", new.CreatedDate)
+	// new.CreatedDate = d.String()
 	//Update servers set PubliIP=? where SerialID=?
 	//Save updated data
 

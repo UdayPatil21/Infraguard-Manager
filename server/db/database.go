@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ActivationDB = "AgentActivations"
+	ActivationDB = "Clusters"
 	ServerDB     = "Servers"
 )
 

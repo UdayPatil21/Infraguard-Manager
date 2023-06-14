@@ -11,7 +11,7 @@ import (
 //Insert activation data into the database
 func AddAgentActivation(c *gin.Context) {
 	logger.Info("IN:AddAgentActivation")
-	activationData := model.AgentActivations{}
+	activationData := model.Clusters{}
 	res := model.Response{}
 	err := c.Bind(&activationData)
 	if err != nil {
@@ -81,7 +81,7 @@ func GetAgentActivationById(c *gin.Context) {
 //Edit activation data and update into the database
 func UpdateAgentActivation(c *gin.Context) {
 	logger.Info("IN: UpdateAgentActivation")
-	updateData := model.AgentActivations{}
+	updateData := model.Clusters{}
 	res := model.Response{}
 	err := c.Bind(&updateData)
 	if err != nil {
