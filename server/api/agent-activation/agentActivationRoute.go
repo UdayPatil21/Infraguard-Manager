@@ -49,7 +49,7 @@ func GetAllActivation(c *gin.Context) {
 		res.Data = "Activation Details Not Found"
 		res.Status = false
 	}
-	c.JSON(http.StatusOK, activations)
+	c.JSON(http.StatusOK, res)
 }
 
 //Get activation details by id from database

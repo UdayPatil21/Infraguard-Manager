@@ -5,6 +5,7 @@ import (
 	"infraguard-manager/db"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
+	"time"
 
 	"net/http"
 
@@ -23,7 +24,8 @@ func RegisterInstance(c *gin.Context) {
 	}
 	//Check if agent is already resister
 	if CheckAgentDB(instanceInfo) {
-		c.JSON(http.StatusOK, "Agent Already Resistered")
+		str := "Agent Already Resistered"
+		c.JSON(http.StatusOK, str)
 		return
 	}
 	//validate activation details before register
@@ -174,4 +176,35 @@ func validateAgentActivation(activationNumber int) bool {
 		return false
 	}
 	return true
+}
+
+//Update agent public ip
+func UpdateAgent(c *gin.Context) {
+	gorm := db.MySqlConnection()
+	server := model.UpdateServer{}
+	new := model.Servers{}
+	err := c.Bind(&server)
+	if err != nil {
+		logger.Error("Error binding data", err)
+		c.JSON(http.StatusExpectationFailed, err)
+		return
+	}
+	if err := gorm.Table(db.ServerDB).Where("InstanceID=?", server.InstanceID).Find(&new).Error; err != nil {
+		logger.Error("Error getting data for updation", err)
+		c.JSON(http.StatusExpectationFailed, err)
+		return
+	}
+	new.PublicIP = server.NetIP
+
+	d, _ := time.Parse("2006-01-02", new.CreatedDate)
+	new.CreatedDate = d.String()
+	//Update servers set PubliIP=? where SerialID=?
+	//Save updated data
+
+	if result := gorm.Preloads(db.ServerDB).Table(db.ServerDB).Where("InstanceID=?", server.InstanceID).Update(&new); result.Error != nil {
+		logger.Error("Error updating the activation details", result.Error)
+		c.JSON(http.StatusExpectationFailed, err)
+		return
+	}
+	c.JSON(http.StatusOK, "Success")
 }

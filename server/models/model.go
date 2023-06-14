@@ -45,6 +45,11 @@ type Response struct {
 	Data   any
 	Status bool
 }
+
+type UpdateServer struct {
+	InstanceID string `gorm:"column:InstanceID"`
+	NetIP      string `json:"NetIP"`
+}
 type AgentActivations struct {
 	ID                   int       `gorm:"column:ID;AUTO_INCREMENT;NOT NULL"`
 	SerialID             string    `gorm:"column:SerialID"`

@@ -14,6 +14,7 @@ func InitRoutes(route *gin.Engine) {
 
 	routeGroup := route.Group("/api")
 	routeGroup.POST("/instance-info", api.RegisterInstance)
+	routeGroup.POST("/update-ip", api.UpdateAgent)
 	routeGroup.POST("/addAgentActivation", activation.AddAgentActivation)
 	routeGroup.GET("/getAgentActivation:id", activation.GetAgentActivationById)
 	routeGroup.GET("/getAllActivations", activation.GetAllActivation)
