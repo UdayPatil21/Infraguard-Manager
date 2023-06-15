@@ -41,7 +41,7 @@ func GetAllActivation(c *gin.Context) {
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
-	logger.Info("OUT:GetAllActivation")
+
 	if len(activations) > 0 {
 		res.Data = activations
 		res.Status = true
@@ -49,6 +49,7 @@ func GetAllActivation(c *gin.Context) {
 		res.Data = "Activation Details Not Found"
 		res.Status = false
 	}
+	logger.Info("OUT:GetAllActivation")
 	c.JSON(http.StatusOK, res)
 }
 
@@ -115,5 +116,25 @@ func DeleteAgentActivationById(c *gin.Context) {
 	logger.Info("OUT:DeleteAgentActivation")
 	res.Data = "Activation Deleted Successfully"
 	res.Status = true
+	c.JSON(http.StatusOK, res)
+}
+
+//Get all activation data from the database
+func GetAllServers(c *gin.Context) {
+	logger.Info("IN:GetAllActivation")
+	res := model.Response{}
+	servers, err := getAllServersDB()
+	if err != nil {
+		logger.Error("Error getting info", err)
+		c.JSON(http.StatusExpectationFailed, err)
+		return
+	}
+	if len(servers) > 0 {
+		res.Data = servers
+		res.Status = true
+	} else {
+		res.Data = "Serves Details Not Found"
+		res.Status = false
+	}
 	c.JSON(http.StatusOK, res)
 }

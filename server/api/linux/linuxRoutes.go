@@ -12,7 +12,7 @@ import (
 func InitLinuxRoutes(routeGroup *gin.RouterGroup) {
 	r := routeGroup.Group("/linux")
 	r.POST("/send-command", sendCommand)
-	r.POST("/execute-script", executeScript)
+	r.POST("/execute-script:machineID", executeScript)
 	r.POST("/sudo-command", sudoCommand)
 }
 
@@ -38,34 +38,25 @@ func sendCommand(c *gin.Context) {
 func executeScript(c *gin.Context) {
 	logger.Info("IN:executeScript")
 
-	// //Read form data
-	// per := c.Request.FormValue("permission")
-	// file, err := c.FormFile("file")
-	// if err != nil {
-	// 	logger.Error("Error getting form data", err)
-	// 	c.JSON(http.StatusBadRequest, err)
-	// 	return
-	// }
-	// content, _ := file.Open()
-	// buf := bytes.NewBuffer(nil)
-	// if _, err = io.Copy(buf, content); err != nil {
-	// 	c.JSON(http.StatusExpectationFailed, err)
-	// 	return
-	// }
-	// var input model.Executable
+	var input model.Executable
+	machineID := c.Param("machineID")
 	data, err := ioutil.ReadAll(c.Request.Body)
-	// err := c.Bind(&input)
 	if err != nil {
-		logger.Error("error binding data", err)
+		logger.Error("error reading request body", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
-	// input.Permission = per
-	// input.Script = buf.Bytes()
 
-	res, err := executeScriptService(data)
+	// if err != nil {
+	// 	logger.Error("error binding data", err)
+	// 	c.JSON(http.StatusExpectationFailed, err)
+	// 	return
+	// }
+	input.Script = data
+	input.MachineID = machineID
+	res, err := executeScriptService(input)
 	if err != nil {
-		logger.Error("Error executing script file", err)
+		logger.Error("Error executing script", err)
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}

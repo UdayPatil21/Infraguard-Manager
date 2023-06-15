@@ -23,8 +23,8 @@ type RunCommand struct {
 }
 
 type Executable struct {
-	Script []byte
-	//Permission string
+	Script    []byte
+	MachineID string `json:"machine_id" gorm:"machine_id" validate:"required"`
 }
 
 // type Activation struct {

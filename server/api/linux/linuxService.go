@@ -83,17 +83,24 @@ func sudoCommandService(input model.RunCommand) (any, error) {
 }
 
 //Execute scripts
-func executeScriptService(jsonReq []byte) (any, error) {
+func executeScriptService(input model.Executable) (any, error) {
 	logger.Info("IN:executeScriptService")
 	// marshal request data
 	// jsonReq, _ := json.Marshal(input)
+
+	instanceInfo, err := getPublicAddressDB(input.MachineID)
+	if err != nil {
+		logger.Error("Error getting instance info from DB", err)
+		return nil, err
+	}
+	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 	}
 	client := &http.Client{Transport: tr}
 
-	resp, err := client.Post(("http://" + "localhost" + ":4200/api/linux/execute-script"),
-		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/execute-script"),
+		"application/json; charset=utf-8", bytes.NewBuffer(input.Script))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
 		return nil, err

@@ -162,3 +162,16 @@ func DeleteAgentActivationByIdDB(activationId string) error {
 	logger.Info("OUT:DeleteAgentActivationByIdDB")
 	return nil
 }
+
+func getAllServersDB() ([]model.Servers, error) {
+	logger.Info("IN:getAllActivationDB")
+	servers := []model.Servers{}
+	// qry := "select * from AgentActivations"
+	gorm := db.MySqlConnection()
+	if err := gorm.Table(db.ServerDB).Find(&servers).Error; err != nil {
+		logger.Error("Error getting all the activation details", err)
+		return servers, err
+	}
+	logger.Info("OUT:getAllActivationDB")
+	return servers, nil
+}

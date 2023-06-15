@@ -5,6 +5,7 @@ import (
 	"infraguard-manager/helpers/logger"
 	"infraguard-manager/routes"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,8 @@ func StartServer() {
 	// })
 
 	//Add middleware CORS
-	r.Use(CORSMiddleware())
+	r.Use(cors.Default())
+	// r.Use(middleware.CORSMiddleware())
 
 	//Init Config
 	configHelper.InitConfig()
@@ -37,18 +39,4 @@ func StartServer() {
 }
 func main() {
 	StartServer()
-}
-
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Credentials", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept,origin,Cache-Control,X-Requested-With")
-		c.Header("Access-Control-Allow-Methods", "POST,HEAD,PATCH,OPTIONS,GET,PUT")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-		c.Next()
-	}
 }

@@ -13,6 +13,7 @@ func InitRoutes(route *gin.Engine) {
 	//Initialize all required routes
 
 	routeGroup := route.Group("/api")
+	// routeGroup = middleware.CORSMiddleware()
 	routeGroup.POST("/instance-info", api.RegisterInstance)
 	routeGroup.POST("/update-ip", api.UpdateAgent)
 	routeGroup.POST("/addAgentActivation", activation.AddAgentActivation)
@@ -20,6 +21,7 @@ func InitRoutes(route *gin.Engine) {
 	routeGroup.GET("/getAllActivations", activation.GetAllActivation)
 	routeGroup.POST("/editAgentActivation", activation.UpdateAgentActivation)
 	routeGroup.GET("/deleteAgentActivation:id", activation.DeleteAgentActivationById)
+	routeGroup.GET("/getAllServers", activation.GetAllServers)
 	windows.InitWindowsRoutes(routeGroup)
 	linux.InitLinuxRoutes(routeGroup)
 }
