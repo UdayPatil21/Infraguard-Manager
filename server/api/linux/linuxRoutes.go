@@ -5,6 +5,7 @@ import (
 	model "infraguard-manager/models"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,14 +55,17 @@ func executeScript(c *gin.Context) {
 	// }
 	input.Script = data
 	input.MachineID = machineID
-	res, err := executeScriptService(input)
+	// res, err := executeScriptService(input)
+	res, err := executeScriptLocal(input)
 	if err != nil {
 		logger.Error("Error executing script", err)
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
+	s2 := strings.Replace(res, `\n`, "\n", -1)
+	s := strings.ReplaceAll(s2, "\\", "")
 	logger.Info("OUT:executeScript")
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, s)
 }
 
 func sudoCommand(c *gin.Context) {

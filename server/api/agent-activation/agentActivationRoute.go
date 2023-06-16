@@ -12,6 +12,11 @@ import (
 func AddAgentActivation(c *gin.Context) {
 	logger.Info("IN:AddAgentActivation")
 	activationData := model.Clusters{}
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Origin", "http://localhost:4200")
+	c.Header("Access-Control-Allow-Methods", "*")
+	c.Header("Access-Control-Allow-Headers", "*")
+	c.Header("Content-Type", "*")
 	res := model.Response{}
 	err := c.Bind(&activationData)
 	if err != nil {
@@ -35,6 +40,11 @@ func AddAgentActivation(c *gin.Context) {
 func GetAllActivation(c *gin.Context) {
 	logger.Info("IN:GetAllActivation")
 	res := model.Response{}
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Origin", "http://localhost:4200")
+	c.Header("Access-Control-Allow-Methods", "*")
+	c.Header("Access-Control-Allow-Headers", "*")
+	c.Header("Content-Type", "*")
 	activations, err := getAllActivationDB()
 	if err != nil {
 		logger.Error("Error getting info", err)

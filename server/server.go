@@ -3,9 +3,9 @@ package main
 import (
 	"infraguard-manager/helpers/configHelper"
 	"infraguard-manager/helpers/logger"
+	"infraguard-manager/middleware"
 	"infraguard-manager/routes"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,8 +19,8 @@ func StartServer() {
 	// })
 
 	//Add middleware CORS
-	r.Use(cors.Default())
-	// r.Use(middleware.CORSMiddleware())
+	// r.Use(cors.Default())
+	r.Use(middleware.CORSMiddleware)
 
 	//Init Config
 	configHelper.InitConfig()

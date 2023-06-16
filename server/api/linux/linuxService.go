@@ -83,7 +83,7 @@ func sudoCommandService(input model.RunCommand) (any, error) {
 }
 
 //Execute scripts
-func executeScriptService(input model.Executable) (any, error) {
+func executeScriptService(input model.Executable) (string, error) {
 	logger.Info("IN:executeScriptService")
 	// marshal request data
 	// jsonReq, _ := json.Marshal(input)
@@ -91,7 +91,7 @@ func executeScriptService(input model.Executable) (any, error) {
 	instanceInfo, err := getPublicAddressDB(input.MachineID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
-		return nil, err
+		return "", err
 	}
 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
 	tr := &http.Transport{
@@ -103,16 +103,52 @@ func executeScriptService(input model.Executable) (any, error) {
 		"application/json; charset=utf-8", bytes.NewBuffer(input.Script))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
-		return nil, err
+		return "", err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("Error Executing Script")
+		return "", errors.New("error executing script")
 	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error("Error reading response", err)
-		return nil, err
+		return "", err
+	}
+	logger.Info("OUT:executeScriptService")
+	return string(responseData), nil
+}
+
+//Execute scripts
+func executeScriptLocal(input model.Executable) (string, error) {
+	logger.Info("IN:executeScriptService")
+	// marshal request data
+	// jsonReq, _ := json.Marshal(input)
+
+	instanceInfo, err := getPublicAddressDB(input.MachineID)
+	if err != nil {
+		logger.Error("Error getting instance info from DB", err)
+		return "", err
+	}
+	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+	}
+	client := &http.Client{Transport: tr}
+
+	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/linux/execute-script"),
+		"application/json; charset=utf-8", bytes.NewBuffer(input.Script))
+	if err != nil {
+		logger.Error("Error executing script file on instance", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New("error executing script")
+	}
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error("Error reading response", err)
+		return "", err
 	}
 	logger.Info("OUT:executeScriptService")
 	return string(responseData), nil
