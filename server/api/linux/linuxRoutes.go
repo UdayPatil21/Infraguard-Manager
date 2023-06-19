@@ -3,7 +3,6 @@ package linux
 import (
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -40,34 +39,30 @@ func executeScript(c *gin.Context) {
 	logger.Info("IN:executeScript")
 
 	var input model.Executable
-	machineID := c.Param("machineID")
-	data, err := ioutil.ReadAll(c.Request.Body)
+
+	err := c.Bind(&input)
 	if err != nil {
-		logger.Error("error reading request body", err)
+		logger.Error("error binding data", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
 
-	// if err != nil {
-	// 	logger.Error("error binding data", err)
-	// 	c.JSON(http.StatusExpectationFailed, err)
-	// 	return
-	// }
-	input.Script = data
-	input.MachineID = machineID
 	// res, err := executeScriptService(input)
-	res, err := executeScriptLocal(input)
+	res, err := executeScriptService(input)
 	if err != nil {
 		logger.Error("Error executing script", err)
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	s2 := strings.Replace(res, `\n`, "\n", -1)
-	s := strings.ReplaceAll(s2, "\\", "")
+	s := SanitizeScript(res)
 	logger.Info("OUT:executeScript")
 	c.JSON(http.StatusOK, s)
 }
-
+func SanitizeScript(script string) string {
+	s2 := strings.Replace(script, `\n`, "\n", -1)
+	// s := strings.ReplaceAll(s2, "\\", "")
+	return s2
+}
 func sudoCommand(c *gin.Context) {
 	logger.Info("IN:sudoCommand")
 	input := model.RunCommand{}

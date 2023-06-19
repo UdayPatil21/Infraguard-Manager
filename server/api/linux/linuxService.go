@@ -82,13 +82,13 @@ func sudoCommandService(input model.RunCommand) (any, error) {
 	return string(responseData), nil
 }
 
-//Execute scripts
+// Execute scripts
 func executeScriptService(input model.Executable) (string, error) {
 	logger.Info("IN:executeScriptService")
 	// marshal request data
 	// jsonReq, _ := json.Marshal(input)
 
-	instanceInfo, err := getPublicAddressDB(input.MachineID)
+	instanceInfo, err := getPublicAddressDB(input.SerialID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
 		return "", err
@@ -98,9 +98,13 @@ func executeScriptService(input model.Executable) (string, error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 	}
 	client := &http.Client{Transport: tr}
-
+	scriptByte, err := json.Marshal(input.Script)
+	if err != nil {
+		logger.Error("Error unmarshaling script", err)
+		return "", err
+	}
 	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/execute-script"),
-		"application/json; charset=utf-8", bytes.NewBuffer(input.Script))
+		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
 		return "", err
@@ -124,7 +128,7 @@ func executeScriptLocal(input model.Executable) (string, error) {
 	// marshal request data
 	// jsonReq, _ := json.Marshal(input)
 
-	instanceInfo, err := getPublicAddressDB(input.MachineID)
+	instanceInfo, err := getPublicAddressDB(input.SerialID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
 		return "", err
@@ -134,9 +138,13 @@ func executeScriptLocal(input model.Executable) (string, error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 	}
 	client := &http.Client{Transport: tr}
-
+	scriptByte, err := json.Marshal(input.Script)
+	if err != nil {
+		logger.Error("Error unmarshaling script", err)
+		return "", err
+	}
 	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/linux/execute-script"),
-		"application/json; charset=utf-8", bytes.NewBuffer(input.Script))
+		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
 		return "", err
