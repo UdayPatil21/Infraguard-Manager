@@ -191,6 +191,6 @@ type Clusters struct {
 	IsDefault          string    `gorm:"column:IsDefault; type:enum('Yes','No');default:No"`
 }
 type CheckStatus struct {
-	SerialID string
+	SerialID string `json:"SerialID"`
 	Status   bool
 }

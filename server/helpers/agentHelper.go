@@ -1,9 +1,7 @@
 package helper
 
 import (
-	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"infraguard-manager/api/linux"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
@@ -18,12 +16,12 @@ func CheckStatus(c *gin.Context) {
 	logger.Info("IN:CheckStatus")
 	checkStatus := model.CheckStatus{}
 	err := c.Bind(&checkStatus)
-	checkStatus.Status = false
 	if err != nil {
 		logger.Error("Error binding data", err)
 		c.JSON(http.StatusExpectationFailed, checkStatus)
 		return
 	}
+	checkStatus.Status = false
 	instanceInfo, err := linux.GetPublicAddressDB(checkStatus.SerialID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
@@ -35,14 +33,12 @@ func CheckStatus(c *gin.Context) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 	}
 	client := &http.Client{Transport: tr}
-	scriptByte, err := json.Marshal(checkStatus)
 	if err != nil {
 		logger.Error("Error in unmarshaling", err)
 		c.JSON(http.StatusExpectationFailed, checkStatus)
 		return
 	}
-	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/checkStatus"),
-		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
+	resp, err := client.Get(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/checkStatus"))
 	if err != nil {
 		logger.Error("Error checking server status", err)
 		c.JSON(http.StatusExpectationFailed, checkStatus)

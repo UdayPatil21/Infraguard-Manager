@@ -17,7 +17,7 @@ func InitRoutes(route *gin.Engine) {
 	// routeGroup = middleware.CORSMiddleware()
 	routeGroup.POST("/instance-info", api.RegisterInstance)
 	routeGroup.POST("/update-ip", api.UpdateAgent)
-	routeGroup.GET("/checkStatus", helper.CheckStatus)
+	routeGroup.POST("/checkStatus", helper.CheckStatus)
 	routeGroup.POST("/addAgentActivation", activation.AddAgentActivation)
 	routeGroup.GET("/getAgentActivation:id", activation.GetAgentActivationById)
 	routeGroup.GET("/getAllActivations", activation.GetAllActivation)
