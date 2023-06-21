@@ -6,16 +6,17 @@ import (
 	model "infraguard-manager/models"
 )
 
-func getPublicAddressDB(serialId string) (model.Servers, error) {
+func GetPublicAddressDB(serialId string) (model.Servers, error) {
 	logger.Info("IN:getPublicAddress")
 
 	res := model.Servers{}
 	// query := "Select * from Servers where SerialID=?"
 	gorm := db.MySqlConnection()
-	if err := gorm.Table(db.ServerDB).Where("SerialID=?", serialId).Find(&res).Error; err != nil {
+	if err := gorm.Table(db.ServerDB).Where("SerialID=? AND IsActive=? AND IsTerminated=?", serialId, "Yes", "No").Find(&res).Error; err != nil {
 		logger.Error("Error getting activation details by SerialID", err)
 		return res, err
 	}
+	// defer gorm.Close()
 	logger.Info("IN:getPublicAddress")
 	return res, nil
 }

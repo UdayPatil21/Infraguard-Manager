@@ -1,10 +1,16 @@
 package api
 
 import (
+	"bytes"
+	"crypto/tls"
+	"encoding/json"
+	"errors"
 	activation "infraguard-manager/api/agent-activation"
 	"infraguard-manager/db"
+	"infraguard-manager/helpers/configHelper"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
+	"io/ioutil"
 
 	"net/http"
 
@@ -13,7 +19,8 @@ import (
 
 func RegisterInstance(c *gin.Context) {
 	//Register all new instances
-	var instanceInfo model.Servers
+	// var instanceInfo model.Agent
+	var instanceInfo model.Agent
 
 	err := c.Bind(&instanceInfo)
 	if err != nil {
@@ -28,13 +35,14 @@ func RegisterInstance(c *gin.Context) {
 		return
 	}
 	//validate activation details before register
-	if !validateAgentActivation(instanceInfo.AgentActivationID) {
-		logger.Error("Agent activation details not matched")
-		c.JSON(http.StatusExpectationFailed, "Agent activation details not matched")
-		return
-	}
+	// if !validateAgentActivation(instanceInfo.AgentActivationID) {
+	// 	logger.Error("Agent activation details not matched")
+	// 	c.JSON(http.StatusExpectationFailed, "Agent activation details not matched")
+	// 	return
+	// }
 	//Resister new server into the manager
-	err = ResisterInstanceService(instanceInfo)
+	// err = ResisterInstanceService(instanceInfo)
+	err = AgentService(instanceInfo)
 	if err != nil {
 		logger.Error("Error inserting instance info", err)
 		c.JSON(http.StatusExpectationFailed, err)
@@ -42,6 +50,33 @@ func RegisterInstance(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, "Success")
 
+}
+func AgentService(agent model.Agent) error {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+	}
+	agentBytes, err := json.Marshal(agent)
+	if err != nil {
+		logger.Error("Error marshling data", err)
+		return err
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Post(("http://" + configHelper.GetString("Infraguard-URL") /*"localhost"*/ /*+ ":4200/api/"*/),
+		"application/json; charset=utf-8", bytes.NewBuffer(agentBytes))
+	if err != nil {
+		logger.Error("Error sending agent data to infraguard server", err)
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("error executing script")
+	}
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error("Error reading response", err)
+		return err
+	}
+	return nil
 }
 
 //Insert instance data into the database
@@ -67,7 +102,7 @@ func ResisterInstanceService(info model.Servers) error {
 	return nil
 }
 
-func CheckAgentDB(instance model.Servers) bool {
+func CheckAgentDB(instance model.Agent) bool {
 	logger.Info("IN:CheckAgentDB")
 	// res := model.Servers{}
 	server := model.Servers{}
@@ -142,7 +177,7 @@ func CheckAgentDB(instance model.Servers) bool {
 	// }
 	gorm := db.MySqlConnection()
 	// gorm.AutoMigrate(&server)
-	if result := gorm.Table(db.ServerDB).Where("InstanceID=?", instance.InstanceID).Find(&server); result.Error != nil {
+	if result := gorm.Table(db.ServerDB).Where("InstanceID=?", instance.MachineID).Find(&server); result.Error != nil {
 		logger.Error("Error getting activation details", result.Error)
 		return false
 	}

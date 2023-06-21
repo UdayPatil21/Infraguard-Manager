@@ -17,7 +17,7 @@ import (
 func sendCommandService(input model.RunCommand) (any, error) {
 	logger.Info("IN:sendCommandService")
 	//Get public ip from db
-	instanceInfo, err := getPublicAddressDB(input.MachineID)
+	instanceInfo, err := GetPublicAddressDB(input.MachineID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
 		return nil, err
@@ -53,7 +53,7 @@ func sendCommandService(input model.RunCommand) (any, error) {
 func sudoCommandService(input model.RunCommand) (any, error) {
 	logger.Info("IN:sudoCommandService")
 	//Get public ip from db
-	instanceInfo, err := getPublicAddressDB(input.MachineID)
+	instanceInfo, err := GetPublicAddressDB(input.MachineID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
 		return nil, err
@@ -83,15 +83,15 @@ func sudoCommandService(input model.RunCommand) (any, error) {
 }
 
 // Execute scripts
-func executeScriptService(input model.Executable) (string, error) {
+func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 	logger.Info("IN:executeScriptService")
 	// marshal request data
 	// jsonReq, _ := json.Marshal(input)
-
-	instanceInfo, err := getPublicAddressDB(input.SerialID)
+	cmd := model.CmdOutput{}
+	instanceInfo, err := GetPublicAddressDB(input.SerialID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
-		return "", err
+		return cmd, err
 	}
 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
 	tr := &http.Transport{
@@ -101,37 +101,44 @@ func executeScriptService(input model.Executable) (string, error) {
 	scriptByte, err := json.Marshal(input.Script)
 	if err != nil {
 		logger.Error("Error unmarshaling script", err)
-		return "", err
+		return cmd, err
 	}
 	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/execute-script"),
 		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
-		return "", err
+		return cmd, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("error executing script")
+		return cmd, errors.New("error executing script")
 	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error("Error reading response", err)
-		return "", err
+		return cmd, err
+	}
+
+	//Convert response data into the object
+	err = json.Unmarshal(responseData, &cmd)
+	if err != nil {
+		logger.Error("Error converting output", err)
+		return cmd, err
 	}
 	logger.Info("OUT:executeScriptService")
-	return string(responseData), nil
+	return cmd, nil
 }
 
-//Execute scripts
-func executeScriptLocal(input model.Executable) (string, error) {
+// Execute scripts
+func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 	logger.Info("IN:executeScriptService")
 	// marshal request data
 	// jsonReq, _ := json.Marshal(input)
-
-	instanceInfo, err := getPublicAddressDB(input.SerialID)
+	cmd := model.CmdOutput{}
+	instanceInfo, err := GetPublicAddressDB(input.SerialID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
-		return "", err
+		return cmd, err
 	}
 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
 	tr := &http.Transport{
@@ -141,23 +148,30 @@ func executeScriptLocal(input model.Executable) (string, error) {
 	scriptByte, err := json.Marshal(input.Script)
 	if err != nil {
 		logger.Error("Error unmarshaling script", err)
-		return "", err
+		return cmd, err
 	}
 	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/linux/execute-script"),
 		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
-		return "", err
+		return cmd, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("error executing script")
+		return cmd, errors.New("error executing script")
 	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error("Error reading response", err)
-		return "", err
+		return cmd, err
+	}
+
+	//Convert response data into the object
+	err = json.Unmarshal(responseData, &cmd)
+	if err != nil {
+		logger.Error("Error converting output", err)
+		return cmd, err
 	}
 	logger.Info("OUT:executeScriptService")
-	return string(responseData), nil
+	return cmd, nil
 }

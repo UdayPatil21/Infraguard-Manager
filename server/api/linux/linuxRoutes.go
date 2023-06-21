@@ -12,7 +12,7 @@ import (
 func InitLinuxRoutes(routeGroup *gin.RouterGroup) {
 	r := routeGroup.Group("/linux")
 	r.POST("/send-command", sendCommand)
-	r.POST("/execute-script:machineID", executeScript)
+	r.POST("/execute-script", executeScript)
 	r.POST("/sudo-command", sudoCommand)
 }
 
@@ -39,7 +39,6 @@ func executeScript(c *gin.Context) {
 	logger.Info("IN:executeScript")
 
 	var input model.Executable
-
 	err := c.Bind(&input)
 	if err != nil {
 		logger.Error("error binding data", err)
@@ -54,9 +53,9 @@ func executeScript(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	s := SanitizeScript(res)
+	// s := SanitizeScript(res)
 	logger.Info("OUT:executeScript")
-	c.JSON(http.StatusOK, s)
+	c.JSON(http.StatusOK, res)
 }
 func SanitizeScript(script string) string {
 	s2 := strings.Replace(script, `\n`, "\n", -1)
