@@ -14,18 +14,31 @@ import (
 // Check Agent Status
 func CheckStatus(c *gin.Context) {
 	logger.Info("IN:CheckStatus")
-	checkStatus := model.CheckStatus{}
-	err := c.Bind(&checkStatus)
+
+	request := model.CheckStatus{}
+	response := model.Response{}
+	err := c.Bind(&request)
 	if err != nil {
 		logger.Error("Error binding data", err)
-		c.JSON(http.StatusExpectationFailed, checkStatus)
+		response.Error = err
+		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
-	checkStatus.Status = false
-	instanceInfo, err := linux.GetPublicAddressDB(checkStatus.SerialID)
+	request.Status = false
+	//Standard Output
+	response.Status = false
+	response.Data = request.SerialID
+	//Check if serialID present or not
+	if request.SerialID == "" {
+		response.Error = "Please Enter Server ID"
+		c.JSON(http.StatusExpectationFailed, response)
+		return
+	}
+	instanceInfo, err := linux.GetPublicAddressDB(request.SerialID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
-		c.JSON(http.StatusExpectationFailed, checkStatus)
+		response.Error = "Provide Correct Server ID"
+		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
@@ -35,21 +48,23 @@ func CheckStatus(c *gin.Context) {
 	client := &http.Client{Transport: tr}
 	if err != nil {
 		logger.Error("Error in unmarshaling", err)
-		c.JSON(http.StatusExpectationFailed, checkStatus)
+		response.Error = err
+		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
-	resp, err := client.Get(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/checkStatus"))
+	resp, err := client.Get(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/checkStatus"))
 	if err != nil {
 		logger.Error("Error checking server status", err)
-		c.JSON(http.StatusExpectationFailed, checkStatus)
+		response.Error = err
+		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		c.JSON(http.StatusExpectationFailed, checkStatus)
+		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
 	logger.Info("OUT:CheckStatus")
-	checkStatus.Status = true
-	c.JSON(http.StatusOK, checkStatus)
+	response.Status = true
+	c.JSON(http.StatusOK, response)
 }

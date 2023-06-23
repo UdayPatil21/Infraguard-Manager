@@ -13,11 +13,10 @@ import (
 func InitRoutes(route *gin.Engine) {
 	//Initialize all required routes
 
-	routeGroup := route.Group("/api")
-	// routeGroup = middleware.CORSMiddleware()
-	routeGroup.POST("/instance-info", api.RegisterInstance)
-	routeGroup.POST("/update-ip", api.UpdateAgent)
-	routeGroup.POST("/checkStatus", helper.CheckStatus)
+	routeGroup := route.Group("/api/agent")
+	routeGroup.POST("/registration/serverinfo", api.RegisterInstance)
+	routeGroup.POST("/update/serverinfo", api.UpdateServerInfo)
+	routeGroup.POST("/verify/connectionstatus", helper.CheckStatus)
 	routeGroup.POST("/addAgentActivation", activation.AddAgentActivation)
 	routeGroup.GET("/getAgentActivation:id", activation.GetAgentActivationById)
 	routeGroup.GET("/getAllActivations", activation.GetAllActivation)

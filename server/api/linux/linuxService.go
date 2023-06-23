@@ -30,7 +30,7 @@ func sendCommandService(input model.RunCommand) (any, error) {
 	}
 	client := &http.Client{Transport: tr}
 	//send and execute command on the instance
-	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost" */ + ":4200/api/linux/send-command"),
+	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost" */ + ":4200/api/linux/command/execute"),
 		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		logger.Error("Error executing command", err)
@@ -103,7 +103,7 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 		logger.Error("Error unmarshaling script", err)
 		return cmd, err
 	}
-	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/execute-script"),
+	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/script/execute"),
 		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
@@ -120,7 +120,7 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 	}
 
 	//Convert response data into the object
-	err = json.Unmarshal(responseData, &cmd)
+	err = json.Unmarshal(responseData, &cmd.Output)
 	if err != nil {
 		logger.Error("Error converting output", err)
 		return cmd, err
@@ -150,7 +150,7 @@ func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 		logger.Error("Error unmarshaling script", err)
 		return cmd, err
 	}
-	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/linux/execute-script"),
+	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/linux/script/execute"),
 		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
@@ -167,7 +167,7 @@ func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 	}
 
 	//Convert response data into the object
-	err = json.Unmarshal(responseData, &cmd)
+	err = json.Unmarshal(responseData, &cmd.Output)
 	if err != nil {
 		logger.Error("Error converting output", err)
 		return cmd, err

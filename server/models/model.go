@@ -7,7 +7,7 @@ import (
 type Agent struct {
 	//ID                     int    `gorm:"column:ID;AUTO_INCREMENT;NOT NULL"`
 	// SerialID     string `gorm:"column:SerialID;NOT NULL"`
-	Name      string `gorm:"column:Name;default:no-name-assigned"`
+	// Name      string `gorm:"column:Name;default:no-name-assigned"`
 	MachineID string `gorm:"column:MachineID;NOT NULL"`
 	// ServerID     string `gorm:"column:ServerID"`
 	// InstanceType string `gorm:"column:InstanceType"`
@@ -83,9 +83,12 @@ type Executable struct {
 type Response struct {
 	Data   any
 	Status bool
+	Error  any
 }
 type CmdOutput struct {
 	Output string
+	Status bool
+	Error  any
 }
 type UpdateServer struct {
 	InstanceID string `gorm:"column:InstanceID"`

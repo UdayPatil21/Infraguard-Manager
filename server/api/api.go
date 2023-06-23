@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	activation "infraguard-manager/api/agent-activation"
@@ -19,19 +18,23 @@ import (
 
 func RegisterInstance(c *gin.Context) {
 	//Register all new instances
-	// var instanceInfo model.Agent
 	var instanceInfo model.Agent
-
+	response := model.Response{}
+	//Statndard Output
+	response.Status = false
 	err := c.Bind(&instanceInfo)
 	if err != nil {
 		logger.Error("Error binding agent data", err)
-		c.JSON(http.StatusExpectationFailed, err)
+		response.Error = err.Error()
+		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
 	//Check if agent is already resister
 	if CheckAgentDB(instanceInfo) {
 		str := "Agent Already Resistered"
-		c.JSON(http.StatusOK, str)
+		response.Data = str
+		response.Status = true
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//validate activation details before register
@@ -45,37 +48,77 @@ func RegisterInstance(c *gin.Context) {
 	err = AgentService(instanceInfo)
 	if err != nil {
 		logger.Error("Error inserting instance info", err)
+		response.Data = "Error in resistration of server"
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
-	c.JSON(http.StatusOK, "Success")
+	response.Status = true
+	response.Data = "Server Resister Successfully"
+	c.JSON(http.StatusOK, response)
 
 }
+
 func AgentService(agent model.Agent) error {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-	}
+	// tr := &http.Transport{
+	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+	// }
 	agentBytes, err := json.Marshal(agent)
 	if err != nil {
 		logger.Error("Error marshling data", err)
 		return err
 	}
-	client := &http.Client{Transport: tr}
-	resp, err := client.Post(("http://" + configHelper.GetString("Infraguard-URL") /*"localhost"*/ /*+ ":4200/api/"*/),
-		"application/json; charset=utf-8", bytes.NewBuffer(agentBytes))
+	jsonStr := string(agentBytes)
+	//Get server URL from config
+	base_url := configHelper.GetString("Infraguard-URL")
+	// base_url := "https://9261-2401-4900-1f39-2814-bdc3-6488-72c0-9157.ngrok-free.app/api/agent/servers"
+	// url := "https://e60a-2401-4900-1c5b-2c6a-2492-6f13-a798-2880.ngrok-free.app/user/get-data"
+	// var v url.Values
+	// v.Add("query", "a two level microprogram simulator")
+	// v.Add("complete", "0")
+	// v.Add("count", "10")
+	// v.Add("model", "latest")
+	// url := base_url + "?" + v.Encode()
+	// client := &http.Client{Transport: tr}
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", base_url, bytes.NewBufferString(jsonStr))
+	// req.Header.Set("Authorization", "d6525df4-292d-49f9-800c-0b2ef79e3b50") local
+	req.Header.Set("Authorization", "401d954d-429c-4577-ade4-180ccb5aca6c")
+	req.Header.Set("Access-Infraguard", "87d647c9-0dcd-4876-bdb9-3ec54e64dfa5")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+
+	// r, err := http.NewRequest("POST", base_url, bytes.NewBufferString(jsonStr))
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// r.Header.Set("Authorization", "c87f8751-3899-4f50-9ef3-5239fd403120")
+	// r.Header.Set("Access-Infraguard", "87d647c9-0dcd-4876-bdb9-3ec54e64dfa5")
+	// r.Header.Add("Content-Type", "application/json")
+
+	// resp, err := client.Post((configHelper.GetString("Infraguard-URL") /*"localhost"*/),
+	// 	"application/json; charset=utf-8", bytes.NewBuffer(agentBytes))
+	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error("Error sending agent data to infraguard server", err)
 		return err
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return errors.New("error executing script")
-	}
-	_, err = ioutil.ReadAll(resp.Body)
+	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error("Error reading response", err)
 		return err
 	}
+	logger.Info(string(respBytes))
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("Error in resistration of server")
+	}
+
+	// var out string
+	// err = json.Unmarshal(respBytes, &out)
+	// if err != nil {
+	// 	logger.Error("Error unmarshling response data", err)
+	// 	return err
+	// }
 	return nil
 }
 
@@ -241,4 +284,28 @@ func UpdateAgent(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, "Success")
+}
+
+func UpdateServerInfo(c *gin.Context) {
+	var instanceInfo model.Agent
+	response := model.Response{}
+	//Statndard Output
+	response.Status = false
+	err := c.Bind(&instanceInfo)
+	if err != nil {
+		logger.Error("Error binding agent data", err)
+		response.Error = err.Error()
+		c.JSON(http.StatusExpectationFailed, response)
+		return
+	}
+	err = AgentService(instanceInfo)
+	if err != nil {
+		logger.Error("Error inserting instance info", err)
+		response.Error = err.Error()
+		c.JSON(http.StatusExpectationFailed, response)
+		return
+	}
+	response.Data = "Server Info Updated Successfully"
+	response.Status = true
+	c.JSON(http.StatusOK, response)
 }
