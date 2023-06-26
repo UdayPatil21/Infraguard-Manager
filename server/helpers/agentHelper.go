@@ -52,7 +52,7 @@ func CheckStatus(c *gin.Context) {
 		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
-	resp, err := client.Get(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/checkStatus"))
+	resp, err := client.Get(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/checkStatus"))
 	if err != nil {
 		logger.Error("Error checking server status", err)
 		response.Error = err

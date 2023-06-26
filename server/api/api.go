@@ -81,9 +81,8 @@ func AgentService(agent model.Agent) error {
 	// client := &http.Client{Transport: tr}
 	client := &http.Client{}
 	req, _ := http.NewRequest("POST", base_url, bytes.NewBufferString(jsonStr))
-	// req.Header.Set("Authorization", "d6525df4-292d-49f9-800c-0b2ef79e3b50") local
-	req.Header.Set("Authorization", "401d954d-429c-4577-ade4-180ccb5aca6c")
-	req.Header.Set("Access-Infraguard", "87d647c9-0dcd-4876-bdb9-3ec54e64dfa5")
+	req.Header.Set("Authorization", configHelper.GetString("Authorization"))
+	req.Header.Set("Access-Infraguard", configHelper.GetString("Access-Infraguard"))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 
