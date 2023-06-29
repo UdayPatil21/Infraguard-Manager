@@ -17,6 +17,7 @@ import (
 )
 
 func RegisterInstance(c *gin.Context) {
+
 	//Register all new instances
 	var instanceInfo model.Agent
 	response := model.Response{}
@@ -70,32 +71,14 @@ func AgentService(agent model.Agent) error {
 	jsonStr := string(agentBytes)
 	//Get server URL from config
 	base_url := configHelper.GetString("Infraguard-URL")
-	// base_url := "https://9261-2401-4900-1f39-2814-bdc3-6488-72c0-9157.ngrok-free.app/api/agent/servers"
-	// url := "https://e60a-2401-4900-1c5b-2c6a-2492-6f13-a798-2880.ngrok-free.app/user/get-data"
-	// var v url.Values
-	// v.Add("query", "a two level microprogram simulator")
-	// v.Add("complete", "0")
-	// v.Add("count", "10")
-	// v.Add("model", "latest")
-	// url := base_url + "?" + v.Encode()
-	// client := &http.Client{Transport: tr}
+	//create req add neccessary headers
 	client := &http.Client{}
-	req, _ := http.NewRequest("POST", base_url, bytes.NewBufferString(jsonStr))
+	req, _ := http.NewRequest("POST", base_url+"/api/agent/servers", bytes.NewBufferString(jsonStr))
 	req.Header.Set("Authorization", configHelper.GetString("Authorization"))
 	req.Header.Set("Access-Infraguard", configHelper.GetString("Access-Infraguard"))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 
-	// r, err := http.NewRequest("POST", base_url, bytes.NewBufferString(jsonStr))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// r.Header.Set("Authorization", "c87f8751-3899-4f50-9ef3-5239fd403120")
-	// r.Header.Set("Access-Infraguard", "87d647c9-0dcd-4876-bdb9-3ec54e64dfa5")
-	// r.Header.Add("Content-Type", "application/json")
-
-	// resp, err := client.Post((configHelper.GetString("Infraguard-URL") /*"localhost"*/),
-	// 	"application/json; charset=utf-8", bytes.NewBuffer(agentBytes))
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error("Error sending agent data to infraguard server", err)
@@ -109,7 +92,7 @@ func AgentService(agent model.Agent) error {
 	logger.Info(string(respBytes))
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("Error in resistration of server")
+		return errors.New("error in resistration of server")
 	}
 
 	// var out string

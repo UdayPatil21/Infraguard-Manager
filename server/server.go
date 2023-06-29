@@ -4,6 +4,7 @@ import (
 	"infraguard-manager/helpers/configHelper"
 	"infraguard-manager/helpers/logger"
 	"infraguard-manager/middleware"
+	"infraguard-manager/middleware/auth"
 	"infraguard-manager/routes"
 
 	"github.com/gin-gonic/gin"
@@ -18,21 +19,25 @@ func StartServer() {
 	// 	c.JSON(http.StatusOK, "Pong")
 	// })
 
-	//Add middleware CORS
-	// r.Use(cors.Default())
-	r.Use(middleware.CORSMiddleware)
-
 	//Init Config
 	configHelper.InitConfig()
 
 	//Init logger
 	logger.Init()
 
-	// Check all agent status concurrently
-	// sheduler.CheckAgentStatus()
+	//Generate JWT Tokens
+	auth.GenerateJWT()
+
+	//Add middleware CORS
+	// r.Use(cors.Default())
+	r.Use(middleware.CORSMiddleware)
 
 	//Initialize routes
 	routes.InitRoutes(r)
+
+	// Check all agent status concurrently
+	// sheduler.Scheduler()
+
 	// log.Println("Server started on :", port)
 	r.Run(":" + configHelper.GetString("Port"))
 

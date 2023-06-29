@@ -163,15 +163,44 @@ func DeleteAgentActivationByIdDB(activationId string) error {
 	return nil
 }
 
-func getAllServersDB() ([]model.Servers, error) {
-	logger.Info("IN:getAllActivationDB")
+func GetAllServersDB() ([]model.Servers, error) {
+	logger.Info("IN:GetAllServersDB")
 	servers := []model.Servers{}
-	// qry := "select * from AgentActivations"
+	// cluster.SerialID AS ActivationSerialID,
+	// cluster.Name AS ActivationName,
+	// cluster.ActivationID,
+	// cluster.ActivationCode,
+	// cluster.TotalServers,
+	// servers.SerialID AS ServerSerialID,
+	// servers.Name AS ServerName,
+	// servers.InstanceID,
+	// servers.ServerID,
+	// servers.PublicIP,
+	// servers.PrivateIP,
+	// servers.Platform,
+	// servers.ComputerName,
+	// servers.SiteHostName
+	qry := `
+	SELECT
+		*
+	FROM
+		infraguard_manager.Clusters cluster
+			INNER JOIN
+		infraguard_manager.Servers servers ON cluster.ID = servers.AgentActivationID
+	WHERE
+		cluster.IsActive = 'Yes'
+			AND cluster.IsDeleted = 'No'
+			AND servers.IsActive = 'Yes'
+			AND servers.IsTerminated = 'No'
+			AND cluster.ProviderID = 5;`
+
 	gorm := db.MySqlConnection()
-	if err := gorm.Table(db.ServerDB).Find(&servers).Error; err != nil {
+
+	// gorm.Table(db.ServerDB).Table(db.ActivationDB).Joins("JOIN Clusters ON Clusters.ID = Servers.AgentActivationID").Where().Find(&servers)
+	if err := gorm.Raw(qry).Scan(&servers).Error; err != nil {
 		logger.Error("Error getting all the activation details", err)
 		return servers, err
 	}
-	logger.Info("OUT:getAllActivationDB")
+	logger.Info("OUT:GetAllServersDB")
 	return servers, nil
 }
