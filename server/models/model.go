@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+var (
+	TokenString string
+	TokenError  error
+)
+
 type Agent struct {
 	//ID                     int    `gorm:"column:ID;AUTO_INCREMENT;NOT NULL"`
 	// SerialID     string `gorm:"column:SerialID;NOT NULL"`

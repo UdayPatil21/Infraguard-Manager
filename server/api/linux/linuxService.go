@@ -2,13 +2,11 @@ package linux
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -25,20 +23,20 @@ func sendCommandService(input model.RunCommand) (any, error) {
 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
 	jsonReq, _ := json.Marshal(input)
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-	}
-	client := &http.Client{Transport: tr}
-	//send and execute command on the instance
-	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost" */ + ":4200/api/linux/command/execute"),
-		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
+	//create http client request and execute commands
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", "http://"+strings.TrimSpace(instanceInfo.PublicIP)+":4200/api/linux/command/execute", bytes.NewBuffer(jsonReq))
+	req.Header.Set("Authorization", model.TokenString)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error("Error executing command", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("Error Executing Command")
+		return "", errors.New("error executing command")
 	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -46,39 +44,6 @@ func sendCommandService(input model.RunCommand) (any, error) {
 		return "", err
 	}
 	logger.Info("OUT:sendCommandService")
-	return string(responseData), nil
-}
-
-//Execute sudo commands
-func sudoCommandService(input model.RunCommand) (any, error) {
-	logger.Info("IN:sudoCommandService")
-	//Get public ip from db
-	instanceInfo, err := GetPublicAddressDB(input.MachineID)
-	if err != nil {
-		logger.Error("Error getting instance info from DB", err)
-		return nil, err
-	}
-	_ = instanceInfo
-
-	jsonReq, _ := json.Marshal(input)
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-	}
-	client := &http.Client{Transport: tr}
-	//send and execute command on the instance
-	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*localhost" */ + ":4200/api/linux/sudo-command"),
-		"application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
-	if err != nil {
-		logger.Error("Error executing command", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	responseData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	logger.Info("OUT:sudoCommandService")
 	return string(responseData), nil
 }
 
@@ -94,17 +59,28 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 		return cmd, err
 	}
 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-	}
-	client := &http.Client{Transport: tr}
+	// tr := &http.Transport{
+	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+	// }
+	// client := &http.Client{Transport: tr}
 	scriptByte, err := json.Marshal(input.Script)
 	if err != nil {
 		logger.Error("Error unmarshaling script", err)
 		return cmd, err
 	}
-	resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/script/execute"),
-		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
+	// resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/script/execute"),
+	// 	"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
+	// if err != nil {
+	// 	logger.Error("Error executing script file on instance", err)
+	// 	return cmd, err
+	// }
+	//create http client request and execute scripts
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", "http://"+strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ +":4200/api/linux/script/execute", bytes.NewBuffer(scriptByte))
+	req.Header.Set("Authorization", model.TokenString)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
 		return cmd, err
@@ -132,8 +108,6 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 // Execute scripts
 func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 	logger.Info("IN:executeScriptService")
-	// marshal request data
-	// jsonReq, _ := json.Marshal(input)
 	cmd := model.CmdOutput{}
 	instanceInfo, err := GetPublicAddressDB(input.SerialID)
 	if err != nil {
@@ -141,31 +115,35 @@ func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 		return cmd, err
 	}
 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-	}
-	client := &http.Client{Transport: tr}
+
 	scriptByte, err := json.Marshal(input.Script)
 	if err != nil {
 		logger.Error("Error unmarshaling script", err)
 		return cmd, err
 	}
-	resp, err := client.Post(("http://" + /*strings.TrimSpace(instanceInfo.PublicIP)*/ "localhost" + ":4200/api/linux/script/execute"),
-		"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
+	//create http client request and execute scripts
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", "http://"+"localhost"+":4200/api/linux/script/execute", bytes.NewBuffer(scriptByte))
+	req.Header.Set("Authorization", model.TokenString)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error("Error executing script file on instance", err)
+		cmd.Output = resp.Status
 		return cmd, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return cmd, errors.New("error executing script")
-	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error("Error reading response", err)
+		cmd.Output = resp.Status
 		return cmd, err
 	}
-
+	if resp.StatusCode != http.StatusOK {
+		cmd.Output = resp.Status
+		return cmd, errors.New("error executing script")
+	}
 	//Convert response data into the object
 	err = json.Unmarshal(responseData, &cmd.Output)
 	if err != nil {

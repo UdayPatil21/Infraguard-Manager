@@ -13,7 +13,6 @@ func InitLinuxRoutes(routeGroup *gin.RouterGroup) {
 	r := routeGroup.Group("/platform/linux")
 	r.POST("/script/command", executeCommand)
 	r.POST("/script/execute", executeScript)
-	r.POST("/sudo-command", sudoCommand)
 }
 
 func executeCommand(c *gin.Context) {
@@ -73,22 +72,4 @@ func SanitizeScript(script string) string {
 	s2 := strings.Replace(script, `\n`, "\n", -1)
 	// s := strings.ReplaceAll(s2, "\\", "")
 	return s2
-}
-func sudoCommand(c *gin.Context) {
-	logger.Info("IN:sudoCommand")
-	input := model.RunCommand{}
-	err := c.Bind(&input)
-	if err != nil {
-		logger.Error("Error binding data", err)
-		c.JSON(http.StatusExpectationFailed, err)
-		return
-	}
-	out, err := sudoCommandService(input)
-	if err != nil {
-		logger.Error("Error executing command on instance", err)
-		c.JSON(http.StatusExpectationFailed, err)
-		return
-	}
-	logger.Info("OUT:sudoCommand")
-	c.JSON(http.StatusOK, out)
 }
