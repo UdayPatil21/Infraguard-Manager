@@ -76,7 +76,7 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 	// }
 	//create http client request and execute scripts
 	client := &http.Client{}
-	req, _ := http.NewRequest("POST", "http://"+strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ +":4200/api/linux/script/execute", bytes.NewBuffer(scriptByte))
+	req, _ := http.NewRequest("POST", "https://"+strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ +":4200/api/linux/script/execute", bytes.NewBuffer(scriptByte))
 	req.Header.Set("Authorization", model.TokenString)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")

@@ -13,25 +13,26 @@ const (
 	ServerDB     = "Servers"
 )
 
-//My SQL driver
-// func MySqlConnection() *sql.DB {
-// 	dburl := configHelper.GetString("DBURL")
-// 	//read config based db url and connect
-// 	log.Print("Create MySql Connection")
-// 	sql, err := sql.Open("mysql", dburl)
-// 	if err != nil {
-// 		log.Println("Cannot connect to database", err)
-// 	}
-// 	return sql
-// }
-func MySqlConnection() *gorm.DB {
+var DBInstance *gorm.DB
+var DBError error
 
+//Initialized mysql connection
+func Init() {
+	//Create one time database connection and share it to the application
+	//Database connection pooling
+	/*
+		is a way to reduce the cost of opening and closing connections by maintaining a “pool” of open connections
+		that can be passed from database operation to database operation as needed.
+	*/
+	MySqlConnection()
+}
+
+func MySqlConnection() {
 	dburl := configHelper.GetString("DBURL")
 	//read config based db url and connect
-	log.Print("Create MySql Connection")
-	gorm, err := gorm.Open("mysql", dburl)
-	if err != nil {
-		log.Println("Cannot connect to database", err)
+	DBInstance, DBError = gorm.Open("mysql", dburl)
+	if DBError != nil {
+		log.Println("Cannot connect to database", DBError)
 	}
-	return gorm
+	log.Println("Connected to Database!")
 }

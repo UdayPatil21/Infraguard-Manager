@@ -11,8 +11,8 @@ func GetPublicAddressDB(serialId string) (model.Servers, error) {
 
 	res := model.Servers{}
 	// query := "Select * from Servers where SerialID=?"
-	gorm := db.MySqlConnection()
-	if err := gorm.Table(db.ServerDB).Where("SerialID=? AND IsActive=? AND IsTerminated=?", serialId, "Yes", "No").Find(&res).Error; err != nil {
+	// gorm := db.MySqlConnection()
+	if err := db.DBInstance.Table(db.ServerDB).Where("SerialID=? AND IsActive=? AND IsTerminated=?", serialId, "Yes", "No").Find(&res).Error; err != nil {
 		logger.Error("Error getting server details by SerialID", err)
 		return res, err
 	}

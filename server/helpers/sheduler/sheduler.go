@@ -35,9 +35,9 @@ func Scheduler() {
 			AND cluster.ProviderID = 5;
 		`
 		//Fetch all active servers data from the database
-		gorm := db.MySqlConnection()
+		// gorm := db.MySqlConnection()
 		// gorm.Table(db.ServerDB).Table(db.ActivationDB).Joins("JOIN Clusters ON Clusters.ID = Servers.AgentActivationID").Where().Find(&servers)
-		if err := gorm.Raw(qry).Scan(&servers).Error; err != nil {
+		if err := db.DBInstance.Raw(qry).Scan(&servers).Error; err != nil {
 			logger.Error("Error getting all the servers details", err)
 		}
 		//check server status and update into the database

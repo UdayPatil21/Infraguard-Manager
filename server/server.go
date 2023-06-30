@@ -1,6 +1,7 @@
 package main
 
 import (
+	"infraguard-manager/db"
 	"infraguard-manager/helpers/configHelper"
 	"infraguard-manager/helpers/logger"
 	"infraguard-manager/middleware"
@@ -26,7 +27,7 @@ func StartServer() {
 	logger.Init()
 
 	//Generate JWT Tokens
-	auth.GenerateJWT()
+	auth.Init()
 
 	//Add middleware CORS
 	// r.Use(cors.Default())
@@ -34,6 +35,9 @@ func StartServer() {
 
 	//Initialize routes
 	routes.InitRoutes(r)
+
+	//Initialized mysql connection
+	db.Init()
 
 	// Check all agent status concurrently
 	// sheduler.Scheduler()
