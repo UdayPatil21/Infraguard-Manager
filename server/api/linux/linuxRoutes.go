@@ -2,6 +2,7 @@ package linux
 
 import (
 	"infraguard-manager/helpers/logger"
+	"infraguard-manager/middleware"
 	model "infraguard-manager/models"
 	"net/http"
 	"strings"
@@ -10,7 +11,7 @@ import (
 )
 
 func InitLinuxRoutes(routeGroup *gin.RouterGroup) {
-	r := routeGroup.Group("/platform/linux")
+	r := routeGroup.Group("/platform/linux").Use(middleware.ValidateDomain())
 	r.POST("/script/command", executeCommand)
 	r.POST("/script/execute", executeScript)
 }

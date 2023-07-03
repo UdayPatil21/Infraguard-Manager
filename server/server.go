@@ -33,6 +33,11 @@ func StartServer() {
 	// r.Use(cors.Default())
 	r.Use(middleware.CORSMiddleware)
 
+	//Login to infraguard.io and initiate the Authentication process
+	//Then generate the user token
+	//Used that user token to access all restricted api's of infraguard server
+	auth.InfraLogin()
+
 	//Initialize routes
 	routes.InitRoutes(r)
 

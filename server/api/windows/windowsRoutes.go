@@ -1,6 +1,7 @@
 package windows
 
 import (
+	"infraguard-manager/middleware"
 	"log"
 	"net/http"
 
@@ -9,7 +10,7 @@ import (
 
 func InitWindowsRoutes(routeGroup *gin.RouterGroup) {
 
-	r := routeGroup.Group("/platform/windows")
+	r := routeGroup.Group("/platform/windows").Use(middleware.ValidateDomain())
 	r.POST("/send-command", SendCommands)
 }
 

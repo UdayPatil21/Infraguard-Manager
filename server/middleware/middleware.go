@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"infraguard-manager/helpers/configHelper"
-	"infraguard-manager/helpers/logger"
+	model "infraguard-manager/models"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,14 +32,20 @@ func CORSMiddleware(c *gin.Context) {
 
 }
 
-func Auth(tokenString string) gin.HandlerFunc {
+func ValidateDomain() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		if tokenString == "" {
-			logger.Error("Token string not Generated")
+		response := model.Response{}
+		//Statndard Output
+		response.Status = false
+		hostString := configHelper.GetString("Infraguard-URL")
+		// Check for authorized domain
+		if !strings.Contains(context.Request.Host, hostString) && !strings.Contains(context.Request.Host, "3.0.119.137") {
+			response.Data = "Unknown Server"
+			response.Error = "Unknown Server Connecting .... Error"
+			context.JSON(http.StatusBadRequest, response)
 			context.Abort()
 			return
 		}
-		context.Request.Header.Add("Authorization", tokenString)
 		context.Next()
 	}
 }

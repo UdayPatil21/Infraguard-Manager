@@ -3,7 +3,6 @@ package helper
 import (
 	"crypto/tls"
 	"infraguard-manager/api/linux"
-	"infraguard-manager/helpers/configHelper"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
 	"net/http"
@@ -18,11 +17,6 @@ func CheckStatus(c *gin.Context) {
 	request := model.CheckStatus{}
 	response := model.Response{}
 
-	//Check for authorized domain
-	if c.Request.Header.Get("Host") != configHelper.GetString("Infraguard-URL") {
-		c.JSON(http.StatusBadRequest, "UnAuthorized Request")
-		return
-	}
 	err := c.Bind(&request)
 	if err != nil {
 		logger.Error("Error binding data", err)

@@ -8,6 +8,7 @@ import (
 	"infraguard-manager/db"
 	"infraguard-manager/helpers/configHelper"
 	"infraguard-manager/helpers/logger"
+	"infraguard-manager/middleware/auth"
 	model "infraguard-manager/models"
 	"io/ioutil"
 
@@ -74,7 +75,8 @@ func AgentService(agent model.Agent) error {
 	//create req add neccessary headers
 	client := &http.Client{}
 	req, _ := http.NewRequest("POST", base_url+"/api/agent/servers", bytes.NewBufferString(jsonStr))
-	req.Header.Set("Authorization", configHelper.GetString("Authorization"))
+	// req.Header.Set("Authorization", configHelper.GetString("Authorization"))
+	req.Header.Set("Authorization", auth.UserToken)
 	req.Header.Set("Access-Infraguard", configHelper.GetString("Access-Infraguard"))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
@@ -83,6 +85,15 @@ func AgentService(agent model.Agent) error {
 	if err != nil {
 		logger.Error("Error sending agent data to infraguard server", err)
 		return err
+	}
+	//authoriaton
+	//You do not have permission to access.
+	//Check for permission error
+	if resp.StatusCode == http.StatusForbidden {
+		//Generate User Token and Try Again
+		auth.GenerateUserToken(auth.LoginToken)
+		//Resister Again with new User Token
+		AgentService(agent)
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
