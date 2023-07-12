@@ -2,10 +2,10 @@ package routes
 
 import (
 	"infraguard-manager/api"
+	"infraguard-manager/api/agent"
 	activation "infraguard-manager/api/agent-activation"
-	"infraguard-manager/api/linux"
-	"infraguard-manager/api/windows"
 	helper "infraguard-manager/helpers"
+	"infraguard-manager/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +13,7 @@ import (
 func InitRoutes(route *gin.Engine) {
 	//Initialize all required routes
 
-	routeGroup := route.Group("/api/agent")
+	routeGroup := route.Group("/api/agent").Use(middleware.ValidateDomain())
 	routeGroup.POST("/registration/serverinfo", api.RegisterInstance)
 	routeGroup.POST("/update/serverinfo", api.UpdateServerInfo)
 	routeGroup.POST("/verify/connectionstatus", helper.CheckStatus)
@@ -23,6 +23,10 @@ func InitRoutes(route *gin.Engine) {
 	routeGroup.POST("/editAgentActivation", activation.UpdateAgentActivation)
 	routeGroup.GET("/deleteAgentActivation:id", activation.DeleteAgentActivationById)
 	routeGroup.GET("/getAllServers", activation.GetAllServers)
-	windows.InitWindowsRoutes(routeGroup)
-	linux.InitLinuxRoutes(routeGroup)
+	// Create seperate routes for different OS support
+	// r := route.Group("/api/agent")
+	routeGroup.POST("/platform/linux/script/execute", agent.ExecuteScript)
+
+	// windows.InitWindowsRoutes(r)
+	// linux.InitLinuxRoutes(r)
 }

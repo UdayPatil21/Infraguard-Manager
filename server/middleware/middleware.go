@@ -39,7 +39,7 @@ func ValidateDomain() gin.HandlerFunc {
 		response.Status = false
 		hostString := configHelper.GetString("Infraguard-URL")
 		// Check for authorized domain
-		if !strings.Contains(context.Request.Host, hostString) && !strings.Contains(context.Request.Host, "3.0.119.137") {
+		if !strings.Contains(context.Request.Host, hostString) && !strings.Contains(context.Request.Host, "3.0.119.137") && !strings.Contains(context.Request.Host, "localhost") {
 			response.Data = "Unknown Server"
 			response.Error = "Unknown Server Connecting .... Error"
 			context.JSON(http.StatusBadRequest, response)

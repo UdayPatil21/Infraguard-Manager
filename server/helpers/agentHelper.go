@@ -2,7 +2,7 @@ package helper
 
 import (
 	"crypto/tls"
-	"infraguard-manager/api/linux"
+	"infraguard-manager/api/agent"
 	"infraguard-manager/helpers/logger"
 	model "infraguard-manager/models"
 	"net/http"
@@ -34,7 +34,7 @@ func CheckStatus(c *gin.Context) {
 		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
-	instanceInfo, err := linux.GetPublicAddressDB(request.SerialID)
+	instanceInfo, err := agent.GetPublicAddressDB(request.SerialID)
 	if err != nil {
 		logger.Error("Error getting instance info from DB", err)
 		response.Error = "Provide Correct Server ID"

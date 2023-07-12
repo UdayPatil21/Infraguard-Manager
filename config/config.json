@@ -1,9 +1,15 @@
 {
     "AppVersion": "1.0.0",
     "Port": "8080",
+    "AgentPort":"4200",
     "Mode": "Development",
-    "JwtSecretKey": "secretkey",
+    "JwtSecretKey": "SuperSecretKey",
+    "Authorization":"6b759c89-a9eb-491c-ac13-661eb343a455",
+    "Access-Infraguard":"87d647c9-0dcd-4876-bdb9-3ec54e64dfa5",
+    "Infraguard-URL":"https://staging-api.infraguard.io",
     "DBURL":"root:Digi@2023@/infraguard_manager?parseTime=true",
-    "DBURL_Prod":"igroot:RightCloud234$@tcp(infraguardstaging.cxsmqljaryok.ap-southeast-1.rds.amazonaws.com:3306)/infraguard?parseTime=true"
+    "DBURL_Prod":"igroot:RightCloud234$@tcp(infraguardstaging.cxsmqljaryok.ap-southeast-1.rds.amazonaws.com:3306)/infraguard?parseTime=true",
+    "email":"infraguardagent@infraguard.io",
+    "password": "superbravo"
 }
 
