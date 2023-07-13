@@ -14,7 +14,7 @@ const (
 	LogsDirpath = "../logs"
 )
 
-var Logger *zap.Logger
+var Log *zap.Logger
 
 func Initialize() {
 	//Create logs folder
@@ -33,7 +33,7 @@ func Initialize() {
 		zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
 		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), defaultLogLevel),
 	)
-	Logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
+	Log = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 
 }
 func Init() {

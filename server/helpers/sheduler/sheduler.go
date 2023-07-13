@@ -13,9 +13,9 @@ import (
 	"github.com/robfig/cron"
 )
 
-//Cron to
-//Fetch servers data from database
-//Update server status on infraguard database
+// Cron to
+// Fetch servers data from database
+// Update server status on infraguard database
 func Scheduler() {
 	c := cron.New()
 	servers := []model.Servers{}
@@ -38,7 +38,7 @@ func Scheduler() {
 		// gorm := db.MySqlConnection()
 		// gorm.Table(db.ServerDB).Table(db.ActivationDB).Joins("JOIN Clusters ON Clusters.ID = Servers.AgentActivationID").Where().Find(&servers)
 		if err := db.DBInstance.Raw(qry).Scan(&servers).Error; err != nil {
-			logger.Error("Error getting all the servers details", err)
+			logger.Log.Sugar().Errorf("Error getting all the servers details", err)
 		}
 		//check server status and update into the database
 		//create seperate goroutines for every server
@@ -53,12 +53,12 @@ func Scheduler() {
 		// }
 	})
 	if err != nil {
-		logger.Info("Error", err)
+		logger.Log.Sugar().Errorf("Error", err)
 	}
 	c.Start()
 }
 
-//Run cron job to check the status of the agent
+// Run cron job to check the status of the agent
 func CheckStatus(SerialID, PublicIP string) {
 	PublicIP = strings.TrimSpace(PublicIP)
 	tr := &http.Transport{
@@ -68,7 +68,7 @@ func CheckStatus(SerialID, PublicIP string) {
 
 	resp, err := client.Get(("http://" + /*strings.TrimSpace(PublicIP)*/ "localhost" + ":4200/api/checkStatus"))
 	if err != nil {
-		logger.Error("Error checking server status", err)
+		logger.Log.Sugar().Errorf("Error checking server status", err)
 		ChangeServerStatus(SerialID)
 	}
 	if resp != nil {
@@ -80,7 +80,7 @@ func CheckStatus(SerialID, PublicIP string) {
 
 }
 func ChangeServerStatus(SerialID string) {
-	logger.Info("IN:ChangeServerStatus")
+	logger.Log.Info("IN:ChangeServerStatus")
 	//Get server URL from config
 	base_url := configHelper.GetString("Infraguard-URL")
 	//create req add neccessary headers
@@ -93,13 +93,13 @@ func ChangeServerStatus(SerialID string) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Error("Error deleting agent server", err)
+		logger.Log.Sugar().Errorf("Error deleting agent server", err)
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("Error reading response", err)
+		logger.Log.Sugar().Errorf("Error reading response", err)
 	}
-	logger.Info(string(respBytes))
+	logger.Log.Info(string(respBytes))
 	defer resp.Body.Close()
-	logger.Info("OUT:ChangeServerStatus")
+	logger.Log.Info("OUT:ChangeServerStatus")
 }

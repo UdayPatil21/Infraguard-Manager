@@ -6,13 +6,13 @@ import (
 )
 
 func addAgentActivationService(data model.Clusters) error {
-	logger.Info("IN: addAgentActivationService")
+	logger.Log.Info("IN: addAgentActivationService")
 	//Insert activation data into the table
 	err := addAgentActivationDB(data)
 	if err != nil {
-		logger.Error("Error in inseting data", err)
+		logger.Log.Sugar().Errorf("Error in inseting data", err)
 		return err
 	}
-	logger.Info("OUT:addAgentActivationService")
+	logger.Log.Info("OUT:addAgentActivationService")
 	return nil
 }

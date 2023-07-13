@@ -1,10 +1,8 @@
 package main
 
 import (
-	"errors"
 	"infraguard-manager/db"
 	"infraguard-manager/helpers/configHelper"
-	"infraguard-manager/helpers/logger"
 	logs "infraguard-manager/helpers/logger"
 	"infraguard-manager/middleware"
 	"infraguard-manager/middleware/auth"
@@ -26,11 +24,8 @@ func StartServer() {
 	configHelper.InitConfig()
 
 	//Init logger
-	// logs.Logger.Init()
 	logs.Initialize()
 
-	err := errors.New("erororororororo")
-	logger.Logger.Sugar().Errorf("Test logs", err)
 	//Generate JWT Tokens
 	auth.Init()
 

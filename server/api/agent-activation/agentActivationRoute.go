@@ -8,36 +8,36 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//Insert activation data into the database
+// Insert activation data into the database
 func AddAgentActivation(c *gin.Context) {
-	logger.Info("IN:AddAgentActivation")
+	logger.Log.Info("IN:AddAgentActivation")
 	activationData := model.Clusters{}
 	res := model.Response{}
 	err := c.Bind(&activationData)
 	if err != nil {
-		logger.Error("Error in binding the activation data", err)
+		logger.Log.Sugar().Errorf("Error in binding the activation data", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
 	err = addAgentActivationService(activationData)
 	if err != nil {
-		logger.Error("Error in addAgentActivationService", err)
+		logger.Log.Sugar().Errorf("Error in addAgentActivationService", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
-	logger.Info("OUT:AddAgentActivation")
+	logger.Log.Info("OUT:AddAgentActivation")
 	res.Data = "Activation Added Successfully"
 	res.Status = true
 	c.JSON(http.StatusOK, res)
 }
 
-//Get all activation data from the database
+// Get all activation data from the database
 func GetAllActivation(c *gin.Context) {
-	logger.Info("IN:GetAllActivation")
+	logger.Log.Info("IN:GetAllActivation")
 	res := model.Response{}
 	activations, err := getAllActivationDB()
 	if err != nil {
-		logger.Error("Error getting info", err)
+		logger.Log.Sugar().Errorf("Error getting info", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
@@ -49,13 +49,13 @@ func GetAllActivation(c *gin.Context) {
 		res.Data = "Activation Details Not Found"
 		res.Status = false
 	}
-	logger.Info("OUT:GetAllActivation")
+	logger.Log.Info("OUT:GetAllActivation")
 	c.JSON(http.StatusOK, res)
 }
 
-//Get activation details by id from database
+// Get activation details by id from database
 func GetAgentActivationById(c *gin.Context) {
-	logger.Info("IN:GetAgentActivationById")
+	logger.Log.Info("IN:GetAgentActivationById")
 	activationId := c.Param("id")
 	res := model.Response{}
 	//get uuid from activationId string
@@ -63,11 +63,11 @@ func GetAgentActivationById(c *gin.Context) {
 	// id, _ := uuid.Parse(activationId)
 	activation, err := GetActivationByIdDB(activationId)
 	if err != nil {
-		logger.Error("Error getting agent data", err)
+		logger.Log.Sugar().Errorf("Error getting agent data", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
-	logger.Info("OUT:GetAgentActivationById")
+	logger.Log.Info("OUT:GetAgentActivationById")
 	if activation.ActivationID != "" {
 		res.Data = activation
 		res.Status = true
@@ -79,53 +79,53 @@ func GetAgentActivationById(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-//Edit activation data and update into the database
+// Edit activation data and update into the database
 func UpdateAgentActivation(c *gin.Context) {
-	logger.Info("IN: UpdateAgentActivation")
+	logger.Log.Info("IN: UpdateAgentActivation")
 	updateData := model.Clusters{}
 	res := model.Response{}
 	err := c.Bind(&updateData)
 	if err != nil {
-		logger.Error("Error binding data", err)
+		logger.Log.Sugar().Errorf("Error binding data", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
 	err = updateAgentActivationDB(updateData)
 	if err != nil {
-		logger.Error("Error updating record", err)
+		logger.Log.Sugar().Errorf("Error updating record", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
-	logger.Info("OUT: UpdateAgentActivation")
+	logger.Log.Info("OUT: UpdateAgentActivation")
 	res.Data = "Activation Updated Successfully"
 	res.Status = true
 	c.JSON(http.StatusOK, res)
 }
 
-//Delete activation data from the database
+// Delete activation data from the database
 func DeleteAgentActivationById(c *gin.Context) {
-	logger.Info("IN:DeleteAgentActivation")
+	logger.Log.Info("IN:DeleteAgentActivation")
 	res := model.Response{}
 	id := c.Param("id")
 	err := DeleteAgentActivationByIdDB(id)
 	if err != nil {
-		logger.Error("Error", err)
+		logger.Log.Sugar().Errorf("Error", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
-	logger.Info("OUT:DeleteAgentActivation")
+	logger.Log.Info("OUT:DeleteAgentActivation")
 	res.Data = "Activation Deleted Successfully"
 	res.Status = true
 	c.JSON(http.StatusOK, res)
 }
 
-//Get all activation data from the database
+// Get all activation data from the database
 func GetAllServers(c *gin.Context) {
-	logger.Info("IN:GetAllActivation")
+	logger.Log.Info("IN:GetAllActivation")
 	res := model.Response{}
 	servers, err := GetAllServersDB()
 	if err != nil {
-		logger.Error("Error getting info", err)
+		logger.Log.Sugar().Errorf("Error getting info", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}

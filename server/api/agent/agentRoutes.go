@@ -10,14 +10,14 @@ import (
 )
 
 func ExecuteScript(c *gin.Context) {
-	logger.Info("IN:executeScript")
+	logger.Log.Info("IN:executeScript")
 
 	var request model.Executable
 	res := model.CmdOutput{}
 	//Bind request data to the struct
 	err := c.Bind(&request)
 	if err != nil {
-		logger.Error("error binding data", err)
+		logger.Log.Sugar().Errorf("error binding data", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
@@ -32,14 +32,14 @@ func ExecuteScript(c *gin.Context) {
 	// res, err := executeScriptService(input)
 	res, err = executeScriptService(request)
 	if err != nil {
-		logger.Error("Error executing script", err)
+		logger.Log.Sugar().Errorf("Error executing script", err)
 		// res.Error = "Error Executing Script Please Check"
 		res.Error = err.Error()
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 	// s := SanitizeScript(res)
-	logger.Info("OUT:executeScript")
+	logger.Log.Info("OUT:executeScript")
 	res.Status = true
 	c.JSON(http.StatusOK, res)
 }

@@ -35,12 +35,12 @@ func RefreshToken() {
 	c := cron.New()
 	err := c.AddFunc("0 0 * * *", GenerateJWT)
 	if err != nil {
-		logger.Info("Error", err)
+		logger.Log.Sugar().Info("Error", err)
 	}
 	c.Start()
 }
 
-//Generate JWT Tokens
+// Generate JWT Tokens
 func GenerateJWT() {
 	jwtKey = configHelper.GetString("JwtSecretKey")
 
@@ -80,7 +80,7 @@ type Response struct {
 // 	IsMFAEnabled string `json:"isMFAEnabled"`
 // }
 
-//Login to infraguard server and initiate authentication process
+// Login to infraguard server and initiate authentication process
 func InfraLogin() {
 
 	loginDetails := Login{
@@ -93,7 +93,7 @@ func InfraLogin() {
 	loginDetails.Password = configHelper.GetString("password")
 	loginBytes, err := json.Marshal(loginDetails)
 	if err != nil {
-		logger.Error("Error marshling data login data", err)
+		logger.Log.Sugar().Errorf("Error marshling data login data", err)
 		// return err
 	}
 	jsonStr := string(loginBytes)
@@ -109,19 +109,19 @@ func InfraLogin() {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Error("Error sending agent data to infraguard server", err)
+		logger.Log.Sugar().Errorf("Error sending agent data to infraguard server", err)
 		// return err
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("Error reading response", err)
+		logger.Log.Sugar().Errorf("Error reading response", err)
 		// return err
 	}
-	logger.Info(string(respBytes))
+	// logger.Log.Info(string(respBytes))
 	res := Response{}
 	err = json.Unmarshal(respBytes, &res)
 	if err != nil {
-		logger.Error("Error unmarshlling login response", err)
+		logger.Log.Sugar().Errorf("Error unmarshlling login response", err)
 	}
 	LoginToken = res.Data.Token
 	GenerateUserToken(res.Data.Token)
@@ -129,8 +129,8 @@ func InfraLogin() {
 
 }
 
-//Get user token from infragurd server
-//By using login token
+// Get user token from infragurd server
+// By using login token
 func GenerateUserToken(token string) {
 	body := Data{
 		Token:        token,
@@ -138,7 +138,7 @@ func GenerateUserToken(token string) {
 	}
 	reqBytes, err := json.Marshal(body)
 	if err != nil {
-		logger.Error("Error marshling data login data", err)
+		logger.Log.Sugar().Errorf("Error marshling data login data", err)
 		// return err
 	}
 	jsonStr := string(reqBytes)
@@ -154,19 +154,19 @@ func GenerateUserToken(token string) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Error("Error sending agent data to infraguard server", err)
+		logger.Log.Sugar().Errorf("Error sending agent data to infraguard server", err)
 		// return err
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("Error reading response", err)
+		logger.Log.Sugar().Errorf("Error reading response", err)
 		// return err
 	}
-	logger.Info(string(respBytes))
+	// logger.Log.Info(string(respBytes))
 	res := Response{}
 	err = json.Unmarshal(respBytes, &res)
 	if err != nil {
-		logger.Error("Error unmarshlling login response", err)
+		logger.Log.Sugar().Errorf("Error unmarshlling login response", err)
 	}
 	UserToken = res.Data.Token
 }

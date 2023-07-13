@@ -18,12 +18,12 @@ type Request struct {
 
 // Execute scripts
 func executeScriptService(input model.Executable) (model.CmdOutput, error) {
-	logger.Info("IN:executeScriptService")
+	logger.Log.Info("IN:executeScriptService")
 	request := Request{}
 	cmd := model.CmdOutput{}
 	instanceInfo, err := GetPublicAddressDB(input.SerialID)
 	if err != nil {
-		logger.Error("Error getting instance info from DB", err)
+		logger.Log.Sugar().Errorf("Error getting instance info from DB", err)
 		return cmd, err
 	}
 	//Trim public ip
@@ -37,7 +37,7 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 	// client := &http.Client{Transport: tr}
 	reqBytes, err := json.Marshal(request)
 	if err != nil {
-		logger.Error("Error unmarshaling script", err)
+		logger.Log.Sugar().Errorf("Error unmarshaling script", err)
 		return cmd, err
 	}
 	jsonStr := string(reqBytes)
@@ -45,7 +45,7 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 	// resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/script/execute"),
 	// 	"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 	// if err != nil {
-	// 	logger.Error("Error executing script file on instance", err)
+	// 	logger.Log.Sugar().Errorf("Error executing script file on instance", err)
 	// 	return cmd, err
 	// }
 
@@ -57,7 +57,7 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 	req.Header.Add("Accept", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Error("Error executing script file on instance", err)
+		logger.Log.Sugar().Errorf("Error executing script file on instance", err)
 		return cmd, err
 	}
 	defer resp.Body.Close()
@@ -66,28 +66,28 @@ func executeScriptService(input model.Executable) (model.CmdOutput, error) {
 	}
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("Error reading response", err)
+		logger.Log.Sugar().Errorf("Error reading response", err)
 		return cmd, err
 	}
 
 	//Convert response data into the object
 	err = json.Unmarshal(responseData, &cmd.Output)
 	if err != nil {
-		logger.Error("Error converting output", err)
+		logger.Log.Sugar().Errorf("Error converting output", err)
 		return cmd, err
 	}
-	logger.Info("OUT:executeScriptService")
+	logger.Log.Info("OUT:executeScriptService")
 	return cmd, nil
 }
 
 // Execute scripts
 func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
-	logger.Info("IN:executeScriptService")
+	logger.Log.Info("IN:executeScriptService")
 	cmd := model.CmdOutput{}
 	request := Request{}
 	instanceInfo, err := GetPublicAddressDB(input.SerialID)
 	if err != nil {
-		logger.Error("Error getting instance info from DB", err)
+		logger.Log.Sugar().Errorf("Error getting instance info from DB", err)
 		return cmd, err
 	}
 	//Trim public ip
@@ -98,7 +98,7 @@ func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 
 	reqBytes, err := json.Marshal(request)
 	if err != nil {
-		logger.Error("Error unmarshaling script", err)
+		logger.Log.Sugar().Errorf("Error unmarshaling script", err)
 		return cmd, err
 	}
 	jsonStr := string(reqBytes)
@@ -110,14 +110,14 @@ func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 	req.Header.Add("Accept", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Error("Error executing script file on instance", err)
+		logger.Log.Sugar().Errorf("Error executing script file on instance", err)
 		cmd.Output = resp.Status
 		return cmd, err
 	}
 	defer resp.Body.Close()
 	responseData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("Error reading response", err)
+		logger.Log.Sugar().Errorf("Error reading response", err)
 		cmd.Output = resp.Status
 		return cmd, err
 	}
@@ -128,9 +128,9 @@ func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
 	//Convert response data into the object
 	err = json.Unmarshal(responseData, &cmd.Output)
 	if err != nil {
-		logger.Error("Error converting output", err)
+		logger.Log.Sugar().Errorf("Error converting output", err)
 		return cmd, err
 	}
-	logger.Info("OUT:executeScriptService")
+	logger.Log.Info("OUT:executeScriptService")
 	return cmd, nil
 }

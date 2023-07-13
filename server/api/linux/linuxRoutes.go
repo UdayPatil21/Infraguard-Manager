@@ -7,33 +7,33 @@ package linux
 // }
 
 // func executeCommand(c *gin.Context) {
-// 	logger.Info("IN:sendCommand")
+// 	logger.Log.Info("IN:sendCommand")
 // 	input := model.RunCommand{}
 // 	err := c.Bind(&input)
 // 	if err != nil {
-// 		logger.Error("Error binding data", err)
+// 		logger.Log.Sugar().Errorf("Error binding data", err)
 // 		c.JSON(http.StatusExpectationFailed, err)
 // 		return
 // 	}
 // 	out, err := sendCommandService(input)
 // 	if err != nil {
-// 		logger.Error("Error executing command on instance", err)
+// 		logger.Log.Sugar().Errorf("Error executing command on instance", err)
 // 		c.JSON(http.StatusExpectationFailed, err.Error())
 // 		return
 // 	}
-// 	logger.Info("OUT:sendCommand")
+// 	logger.Log.Info("OUT:sendCommand")
 // 	c.JSON(http.StatusOK, out)
 // }
 
 // func executeScript(c *gin.Context) {
-// 	logger.Info("IN:executeScript")
+// 	logger.Log.Info("IN:executeScript")
 
 // 	var request model.Executable
 // 	res := model.CmdOutput{}
 // 	//Bind request data to the struct
 // 	err := c.Bind(&request)
 // 	if err != nil {
-// 		logger.Error("error binding data", err)
+// 		logger.Log.Sugar().Errorf("error binding data", err)
 // 		c.JSON(http.StatusExpectationFailed, err)
 // 		return
 // 	}
@@ -48,14 +48,14 @@ package linux
 // 	// res, err := executeScriptService(input)
 // 	res, err = executeScriptService(request)
 // 	if err != nil {
-// 		logger.Error("Error executing script", err)
+// 		logger.Log.Sugar().Errorf("Error executing script", err)
 // 		// res.Error = "Error Executing Script Please Check"
 // 		res.Error = err.Error()
 // 		c.JSON(http.StatusBadRequest, res)
 // 		return
 // 	}
 // 	// s := SanitizeScript(res)
-// 	logger.Info("OUT:executeScript")
+// 	logger.Log.Info("OUT:executeScript")
 // 	res.Status = true
 // 	c.JSON(http.StatusOK, res)
 // }

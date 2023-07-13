@@ -26,7 +26,7 @@ func RegisterInstance(c *gin.Context) {
 	response.Status = false
 	err := c.Bind(&instanceInfo)
 	if err != nil {
-		logger.Error("Error binding agent data", err)
+		logger.Log.Sugar().Errorf("Error binding agent data", err)
 		response.Error = err.Error()
 		c.JSON(http.StatusExpectationFailed, response)
 		return
@@ -41,7 +41,7 @@ func RegisterInstance(c *gin.Context) {
 	}
 	//validate activation details before register
 	// if !validateAgentActivation(instanceInfo.AgentActivationID) {
-	// 	logger.Error("Agent activation details not matched")
+	// 	logger.Log.Sugar().Errorf("Agent activation details not matched")
 	// 	c.JSON(http.StatusExpectationFailed, "Agent activation details not matched")
 	// 	return
 	// }
@@ -49,7 +49,7 @@ func RegisterInstance(c *gin.Context) {
 	// err = ResisterInstanceService(instanceInfo)
 	err = AgentService(instanceInfo)
 	if err != nil {
-		logger.Error("Error inserting instance info", err)
+		logger.Log.Sugar().Errorf("Error inserting instance info", err)
 		response.Data = "Error in resistration of server"
 		c.JSON(http.StatusExpectationFailed, err)
 		return
@@ -66,7 +66,7 @@ func AgentService(agent model.Agent) error {
 	// }
 	agentBytes, err := json.Marshal(agent)
 	if err != nil {
-		logger.Error("Error marshling data", err)
+		logger.Log.Sugar().Errorf("Error marshling data", err)
 		return err
 	}
 	jsonStr := string(agentBytes)
@@ -83,7 +83,7 @@ func AgentService(agent model.Agent) error {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Error("Error sending agent data to infraguard server", err)
+		logger.Log.Sugar().Errorf("Error sending agent data to infraguard server", err)
 		return err
 	}
 	//authoriaton
@@ -97,10 +97,10 @@ func AgentService(agent model.Agent) error {
 	}
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("Error reading response", err)
+		logger.Log.Sugar().Errorf("Error reading response", err)
 		return err
 	}
-	logger.Info(string(respBytes))
+	logger.Log.Info(string(respBytes))
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return errors.New("error in resistration of server")
@@ -109,25 +109,25 @@ func AgentService(agent model.Agent) error {
 	// var out string
 	// err = json.Unmarshal(respBytes, &out)
 	// if err != nil {
-	// 	logger.Error("Error unmarshling response data", err)
+	// 	logger.Log.Sugar().Errorf("Error unmarshling response data", err)
 	// 	return err
 	// }
 	return nil
 }
 
 func CheckAgentDB(instance model.Agent) bool {
-	logger.Info("IN:CheckAgentDB")
+	logger.Log.Info("IN:CheckAgentDB")
 	server := model.Servers{}
 
 	if result := db.DBInstance.Table(db.ServerDB).Where("InstanceID=?", instance.MachineID).Find(&server); result.Error != nil {
-		logger.Error("Error getting activation details", result.Error)
+		logger.Log.Sugar().Errorf("Error getting activation details", result.Error)
 		return false
 	}
 	if server.SerialID != "" {
-		logger.Info("Agent already available")
+		logger.Log.Info("Agent already available")
 		return true
 	}
-	logger.Info("OUT:CheckAgentDB")
+	logger.Log.Info("OUT:CheckAgentDB")
 	return false
 }
 
@@ -139,12 +139,12 @@ func ServiceHandler() *sh {
 	return &sh{}
 }
 
-//validate activation details before register
+// validate activation details before register
 func validateAgentActivation(activationNumber int) bool {
 
 	activation, err := activation.GetActivationByNumberDB(activationNumber)
 	if err != nil {
-		logger.Error("error getting activation data", err)
+		logger.Log.Sugar().Errorf("error getting activation data", err)
 		return false
 	}
 	// id, _ := uuid.Parse(activationId)
@@ -154,19 +154,19 @@ func validateAgentActivation(activationNumber int) bool {
 	return true
 }
 
-//Update agent public ip
+// Update agent public ip
 func UpdateAgent(c *gin.Context) {
 	// gorm := db.MySqlConnection()
 	server := model.UpdateServer{}
 	new := model.Servers{}
 	err := c.Bind(&server)
 	if err != nil {
-		logger.Error("Error binding data", err)
+		logger.Log.Sugar().Errorf("Error binding data", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
 	if err := db.DBInstance.Table(db.ServerDB).Where("InstanceID=?", server.InstanceID).Find(&new).Error; err != nil {
-		logger.Error("Error getting data for updation", err)
+		logger.Log.Sugar().Errorf("Error getting data for updation", err)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
@@ -178,7 +178,7 @@ func UpdateAgent(c *gin.Context) {
 	//Save updated data
 
 	if result := db.DBInstance.Preloads(db.ServerDB).Table(db.ServerDB).Where("InstanceID=?", server.InstanceID).Update(&new); result.Error != nil {
-		logger.Error("Error updating the activation details", result.Error)
+		logger.Log.Sugar().Errorf("Error updating the activation details", result.Error)
 		c.JSON(http.StatusExpectationFailed, err)
 		return
 	}
@@ -192,14 +192,14 @@ func UpdateServerInfo(c *gin.Context) {
 	response.Status = false
 	err := c.Bind(&instanceInfo)
 	if err != nil {
-		logger.Error("Error binding agent data", err)
+		logger.Log.Sugar().Errorf("Error binding agent data", err)
 		response.Error = err.Error()
 		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
 	err = AgentService(instanceInfo)
 	if err != nil {
-		logger.Error("Error inserting instance info", err)
+		logger.Log.Sugar().Errorf("Error inserting instance info", err)
 		response.Error = err.Error()
 		c.JSON(http.StatusExpectationFailed, response)
 		return

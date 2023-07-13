@@ -2,11 +2,11 @@ package linux
 
 // //Execute commands
 // func sendCommandService(input model.RunCommand) (any, error) {
-// 	logger.Info("IN:sendCommandService")
+// 	logger.Log.Info("IN:sendCommandService")
 // 	//Get public ip from db
 // 	instanceInfo, err := GetPublicAddressDB(input.MachineID)
 // 	if err != nil {
-// 		logger.Error("Error getting instance info from DB", err)
+// 		logger.Log.Sugar().Errorf("Error getting instance info from DB", err)
 // 		return nil, err
 // 	}
 // 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
@@ -20,7 +20,7 @@ package linux
 // 	req.Header.Add("Accept", "application/json")
 // 	resp, err := client.Do(req)
 // 	if err != nil {
-// 		logger.Error("Error executing command", err)
+// 		logger.Log.Sugar().Errorf("Error executing command", err)
 // 		return nil, err
 // 	}
 // 	defer resp.Body.Close()
@@ -29,10 +29,10 @@ package linux
 // 	}
 // 	responseData, err := ioutil.ReadAll(resp.Body)
 // 	if err != nil {
-// 		logger.Error("Error:", err)
+// 		logger.Log.Sugar().Errorf("Error:", err)
 // 		return "", err
 // 	}
-// 	logger.Info("OUT:sendCommandService")
+// 	logger.Log.Info("OUT:sendCommandService")
 // 	return string(responseData), nil
 // }
 
@@ -43,12 +43,12 @@ package linux
 
 // // Execute scripts
 // func executeScriptService(input model.Executable) (model.CmdOutput, error) {
-// 	logger.Info("IN:executeScriptService")
+// 	logger.Log.Info("IN:executeScriptService")
 // 	request := Request{}
 // 	cmd := model.CmdOutput{}
 // 	instanceInfo, err := GetPublicAddressDB(input.SerialID)
 // 	if err != nil {
-// 		logger.Error("Error getting instance info from DB", err)
+// 		logger.Log.Sugar().Errorf("Error getting instance info from DB", err)
 // 		return cmd, err
 // 	}
 // 	//Trim public ip
@@ -62,7 +62,7 @@ package linux
 // 	// client := &http.Client{Transport: tr}
 // 	reqBytes, err := json.Marshal(request)
 // 	if err != nil {
-// 		logger.Error("Error unmarshaling script", err)
+// 		logger.Log.Sugar().Errorf("Error unmarshaling script", err)
 // 		return cmd, err
 // 	}
 // 	jsonStr := string(reqBytes)
@@ -70,7 +70,7 @@ package linux
 // 	// resp, err := client.Post(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/linux/script/execute"),
 // 	// 	"application/json; charset=utf-8", bytes.NewBuffer(scriptByte))
 // 	// if err != nil {
-// 	// 	logger.Error("Error executing script file on instance", err)
+// 	// 	logger.Log.Sugar().Errorf("Error executing script file on instance", err)
 // 	// 	return cmd, err
 // 	// }
 
@@ -82,7 +82,7 @@ package linux
 // 	req.Header.Add("Accept", "application/json")
 // 	resp, err := client.Do(req)
 // 	if err != nil {
-// 		logger.Error("Error executing script file on instance", err)
+// 		logger.Log.Sugar().Errorf("Error executing script file on instance", err)
 // 		return cmd, err
 // 	}
 // 	defer resp.Body.Close()
@@ -91,34 +91,34 @@ package linux
 // 	}
 // 	responseData, err := ioutil.ReadAll(resp.Body)
 // 	if err != nil {
-// 		logger.Error("Error reading response", err)
+// 		logger.Log.Sugar().Errorf("Error reading response", err)
 // 		return cmd, err
 // 	}
 
 // 	//Convert response data into the object
 // 	err = json.Unmarshal(responseData, &cmd.Output)
 // 	if err != nil {
-// 		logger.Error("Error converting output", err)
+// 		logger.Log.Sugar().Errorf("Error converting output", err)
 // 		return cmd, err
 // 	}
-// 	logger.Info("OUT:executeScriptService")
+// 	logger.Log.Info("OUT:executeScriptService")
 // 	return cmd, nil
 // }
 
 // // Execute scripts
 // func executeScriptLocal(input model.Executable) (model.CmdOutput, error) {
-// 	logger.Info("IN:executeScriptService")
+// 	logger.Log.Info("IN:executeScriptService")
 // 	cmd := model.CmdOutput{}
 // 	instanceInfo, err := GetPublicAddressDB(input.SerialID)
 // 	if err != nil {
-// 		logger.Error("Error getting instance info from DB", err)
+// 		logger.Log.Sugar().Errorf("Error getting instance info from DB", err)
 // 		return cmd, err
 // 	}
 // 	instanceInfo.PublicIP = strings.TrimSpace(instanceInfo.PublicIP)
 
 // 	scriptByte, err := json.Marshal(input.Script)
 // 	if err != nil {
-// 		logger.Error("Error unmarshaling script", err)
+// 		logger.Log.Sugar().Errorf("Error unmarshaling script", err)
 // 		return cmd, err
 // 	}
 // 	//create http client request and execute scripts
@@ -129,14 +129,14 @@ package linux
 // 	req.Header.Add("Accept", "application/json")
 // 	resp, err := client.Do(req)
 // 	if err != nil {
-// 		logger.Error("Error executing script file on instance", err)
+// 		logger.Log.Sugar().Errorf("Error executing script file on instance", err)
 // 		cmd.Output = resp.Status
 // 		return cmd, err
 // 	}
 // 	defer resp.Body.Close()
 // 	responseData, err := ioutil.ReadAll(resp.Body)
 // 	if err != nil {
-// 		logger.Error("Error reading response", err)
+// 		logger.Log.Sugar().Errorf("Error reading response", err)
 // 		cmd.Output = resp.Status
 // 		return cmd, err
 // 	}
@@ -147,9 +147,9 @@ package linux
 // 	//Convert response data into the object
 // 	err = json.Unmarshal(responseData, &cmd.Output)
 // 	if err != nil {
-// 		logger.Error("Error converting output", err)
+// 		logger.Log.Sugar().Errorf("Error converting output", err)
 // 		return cmd, err
 // 	}
-// 	logger.Info("OUT:executeScriptService")
+// 	logger.Log.Info("OUT:executeScriptService")
 // 	return cmd, nil
 // }

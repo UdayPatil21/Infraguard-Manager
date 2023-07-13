@@ -13,13 +13,13 @@ import (
 
 // Check Agent Status
 func CheckStatus(c *gin.Context) {
-	logger.Info("IN:CheckStatus")
+	logger.Log.Info("IN:CheckStatus")
 	request := model.CheckStatus{}
 	response := model.Response{}
 
 	err := c.Bind(&request)
 	if err != nil {
-		logger.Error("Error binding data", err)
+		logger.Log.Sugar().Errorf("Error binding data", err)
 		response.Error = err
 		c.JSON(http.StatusExpectationFailed, response)
 		return
@@ -36,7 +36,7 @@ func CheckStatus(c *gin.Context) {
 	}
 	instanceInfo, err := agent.GetPublicAddressDB(request.SerialID)
 	if err != nil {
-		logger.Error("Error getting instance info from DB", err)
+		logger.Log.Sugar().Errorf("Error getting instance info from DB", err)
 		response.Error = "Provide Correct Server ID"
 		c.JSON(http.StatusExpectationFailed, response)
 		return
@@ -47,14 +47,14 @@ func CheckStatus(c *gin.Context) {
 	}
 	client := &http.Client{Transport: tr}
 	if err != nil {
-		logger.Error("Error in unmarshaling", err)
+		logger.Log.Sugar().Errorf("Error in unmarshaling", err)
 		response.Error = err
 		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
 	resp, err := client.Get(("http://" + strings.TrimSpace(instanceInfo.PublicIP) /*"localhost"*/ + ":4200/api/checkStatus"))
 	if err != nil {
-		logger.Error("Error checking server status", err)
+		logger.Log.Sugar().Errorf("Error checking server status", err)
 		response.Error = err
 		c.JSON(http.StatusExpectationFailed, response)
 		return
@@ -64,7 +64,7 @@ func CheckStatus(c *gin.Context) {
 		c.JSON(http.StatusExpectationFailed, response)
 		return
 	}
-	logger.Info("OUT:CheckStatus")
+	logger.Log.Info("OUT:CheckStatus")
 	response.Status = true
 	c.JSON(http.StatusOK, response)
 }
